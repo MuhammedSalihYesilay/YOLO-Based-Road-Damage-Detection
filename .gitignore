@@ -1,0 +1,13 @@
+# Veri seti ve referans proje (repoya konmaz, README'ye bakın)
+data/
+reference/
+
+# Python sanal ortamı ve önbellek
+venv/
+.venv/
+__pycache__/
+
+# Eğitim çıktıları ve model dosyaları
+runs/
+*.pt
+*.onnx
