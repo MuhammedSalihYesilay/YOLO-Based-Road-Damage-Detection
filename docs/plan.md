@@ -39,7 +39,7 @@ Bu plan v1'in yerini alıyor; v1'deki veri seti bulguları (A bölümü) korunuy
    - **Deney kayıt tablosu:** her eğitimin ayarları ve sonuçları `docs/deneyler.md` dosyasına yazılır (rapordaki karşılaştırma tablosunun kaynağı).
    - **Tekrarlanabilirlik:** sabit seed, `requirements.txt` sürümleri sabit, veri bölme listesi dosyaya kaydedilir.
    - **Ekip içi görev dağılımı:** 2 kişi paralel çalışabilir (biri model, biri arayüz) → §7 sonu.
-   - **Git/GitHub iş akışı:** uzak depo; `data/` ve ağırlık dosyaları (`*.pt`) git dışında; ağırlıkların nerede saklanacağı belirlenecek.
+   - **Git/GitHub iş akışı:** uzak depo; `data/` ve ağırlık dosyaları (`*.pt`) git dışında; ağırlıklar GitHub Releases'ta saklanır (kararlar.md, 2026-10-18).
    - **Lisans ve atıf:** RDD2022 CC BY-SA 4.0, atıf zorunlu. Referans projede LICENSE dosyası yok; kodunu kopyalamayıp inceleyerek kendimiz yazacağız ve raporda atıf vereceğiz.
    - **Risk planı:** eğitim süresi, Kaggle kotası, tarayıcı kamera izinleri (webrtc), sunumda internet olmaması → yedek demo videosu.
    - **Referans uygulamadaki bir hata:** görüntüyü elle 640x640'a `cv2.resize` ediyor, bu en-boy oranını bozuyor. Biz Ultralytics'in kendi `imgsz` ön işlemesini kullanacağız.
@@ -71,6 +71,8 @@ Bu plan v1'in yerini alıyor; v1'deki veri seti bulguları (A bölümü) korunuy
 ## 5. Eğitim ortamı (önerilen)
 - **Yerel (GTX 1650, 4 GB):** küçük denemeler, hattı doğrulama, arayüz ve tahmin. 4 GB ile v8s/640 için batch ≈ 8 civarı çalışır, tam eğitim günler sürer.
 - **Kaggle (önerim):** haftada ~30 saat ücretsiz GPU (P100 / T4x2), oturum en fazla 12 saat; veri seti yüklenip kalıcı tutulabiliyor. Colab yedek seçenek.
+- **İş bölümü (karar, 2026-10-18):** ağır eğitim Kaggle'da; analiz, dönüştürme, bölme, küçük denemeler, final test, değerlendirme, FPS ve arayüz yerelde. FPS yalnızca yerelde (GTX 1650).
+- **Kaggle düzeni (karar, 2026-10-18):** veri Adım 3'ten sonra YOLO formatında, Norveç küçültülmüş halde private dataset olarak yüklenir; Hakan collaborator, kendi hesabıyla da eğitim yapabilir (kota hesap başına). Cache kapalı, veri `/kaggle/input`, çıktılar `/kaggle/working`.
 - **Hazırlık:** Norveç görüntüleri 4040 px. Yüklemeden önce eğitim boyutuna uygun küçültülmüş kopya hazırlamak hem yükleme süresini hem disk kullanımını ciddi azaltır (Norveç boyut kararına bağlı, Adım 2).
 
 ## 6. Kapsam
@@ -113,8 +115,10 @@ Sitede tutanlar: toplamlar (47.420 görüntü, 61.082 etiket, 12,86 GB), sınıf
 ## 7. Adımlar ("Ne öğreneceğim" ve "Hocaya nasıl anlatırım" notlarıyla)
 
 **Adım 0: Kurulum**
-~~git init + GitHub deposu, `.gitignore` (data/, reference/, venv/, runs/, *.pt, *.onnx, __pycache__/, kaggle.json)~~ ✅ 2026-10-15; kalan: venv, `requirements.txt`. (`docs/kararlar.md`, `docs/proje-onerisi.md` ve CLAUDE.md düzeltmeleri 2026-10-15'te yapıldı.)
-- NVIDIA sürücüsünü güncelle, torch'u CUDA derlemesiyle kur; hazır modeli yeni ultralytics'te açma testi (ayrıntı: docs/arastirma/python-surumu.md)
+~~git init + GitHub deposu, `.gitignore` (data/, reference/, venv/, runs/, *.pt, *.onnx, __pycache__/, kaggle.json)~~ ✅ 2026-10-15. (`docs/kararlar.md`, `docs/proje-onerisi.md` ve CLAUDE.md düzeltmeleri 2026-10-15'te yapıldı.)
+- ✅ 2026-10-18: Hakan (hakan0363) collaborator daveti kabul etti; NVIDIA sürücüsü 617.42 (CUDA 13.4'e kadar); Kaggle hesabı hazır (telefon doğrulandı; GPU 30 sa/hafta, private dataset 214,75 GB); disk 72,9 GB boş
+- ✅ 2026-10-18: python.org Python 3.13.16 + `venv/`; torch 2.14.1+cu130, ultralytics 8.4.182, opencv, pandas, matplotlib; `requirements.txt` (cu130 dahil); `torch.cuda.is_available()` = True; hazır model yeni ultralytics'te açıldı ve tahmin üretti, ONNX'e gerek yok (kararlar.md)
+- Kalan: Kaggle GPU deneme notebook'u
 - *Ne öğreneceğim:* venv neden gerekli, git commit/push/branch, iki kişiyle çakışmadan çalışma.
 - *Hocaya:* "Proje sürüm kontrollü ve tekrar kurulabilir; büyük veri ve model dosyaları depoya girmiyor."
 
@@ -178,6 +182,7 @@ Görüntüleri tek tek açmaz; sadece `ann/*.json` okunur, boyut doğrulaması i
 **Adım 11 (ek, zaman kalırsa):** GPS → SQLite → harita → takip.
 
 ### Görev dağılımı önerisi (2 kişi)
+Kişi A / Kişi B'nin kim olacağı henüz belli değil (§10).
 - **Kişi A (model):** Adım 1-6, 9
 - **Kişi B (uygulama):** Adım 7-8 (başta referansın hazır modeliyle, sonra bizim modelle), Git düzeni, ek özellikler
 - **Ortak:** Adım 2 kararları, rapor, sunum
@@ -207,6 +212,14 @@ Not: vize/final haftaları ve kesin teslim tarihi bilinince çizelge güncellene
 - `CLAUDE.md` güncellendi: ana kapsam / ek özellikler ayrımı, Teknolojiler ve Değerlendirme bölümleri, Streamlit + tamamen Python kararları, SDG 11 ve kategori, veri seti düzeltmeleri (A 1-10, 12-16), ısı haritası maddesinin silinmesi, ekip notu, "ne öğreneceğim / hocaya nasıl anlatırım" kuralı.
 - `docs/plan.md` bu v2 ile değiştirildi.
 - `docs/kararlar.md` oluşturuldu.
+
+## 10. Açık konular (2026-10-18; çoğu Adım 1 analizini bekliyor)
+1. **Deney bütçesi:** Hafta 5'teki 4 model karşılaştırması (50 epoch) haftalık 30 saatlik Kaggle kotasına sığmıyor. Adım 4'te baseline'ın epoch süresi ölçülünce iki hesapla ve koşu planıyla yeniden hesaplanacak.
+2. **Ardışık kare (sekans) sızıntısı:** Adım 1'de dosya adlarında sekans/çekim bilgisi var mı bakılacak; varsa bölme sekans bazında yapılacak (aynı sekansın kareleri hem train hem test'e düşmemeli).
+3. **Görev dağılımı:** Kişi A / Kişi B kim olacak, belli değil. Branch düzeni önerisi: herkes kendi dalında çalışır, `main`'e Pull Request ile birleştirir.
+4. **`docs/deneyler.md` sütun şablonu** belirlenecek.
+5. **Hindistan'ın bozuk en-boy oranı:** karar verilecek (muhtemelen dokunulmayacak).
+6. **Vize/final tarihleri** belli olunca §8 çizelgesi güncellenecek.
 
 ## Doğrulama
 - CLAUDE.md, plan.md ve proje-onerisi.md arasında kapsam, teknoloji ve karar çelişkisi kalmamalı.

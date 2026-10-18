@@ -1,0 +1,14 @@
+# Yerel ortam (Windows, Python 3.13, NVIDIA sürücüsü >= 580)
+# Kurulum: venv\Scripts\python.exe -m pip install -r requirements.txt
+# torch/torchvision CUDA 13.0 derlemesi aşağıdaki PyTorch deposundan gelir (+cu130 etiketi).
+# Kaggle/Colab'da torch zaten kurulu: orada sadece "pip install ultralytics==8.4.182" yeterli.
+--extra-index-url https://download.pytorch.org/whl/cu130
+
+torch==2.14.1+cu130
+torchvision==0.29.1+cu130
+ultralytics==8.4.182
+opencv-python==5.0.0.93
+pandas==3.0.6
+matplotlib==3.11.2
+
+# Arayüz adımında eklenecek: streamlit, streamlit-webrtc

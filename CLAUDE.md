@@ -17,14 +17,16 @@ GPS eşleştirme → veritabanına kayıt → harita gösterimi → aynı hasar�
 - Kategori: Construction / Architecture
 
 ## Teknolojiler
-- Python 3.13 + venv; GPU: GTX 1650 (NVIDIA sürücüsü güncellenecek)
+- Python 3.13 (python.org) + venv; GPU: GTX 1650 (sürücü 617.42, torch CUDA 13.0 / cu130)
 - PyTorch (Ultralytics'in altındaki derin öğrenme kütüphanesi)
 - Ultralytics YOLO (eğitim, değerlendirme, tahmin)
 - OpenCV (görüntü/video/kamera işleme)
 - Streamlit + streamlit-webrtc (web arayüzü, gerçek zamanlı kamera)
 - pandas, matplotlib (analiz ve grafikler)
 - Git / GitHub (repo: github.com/MuhammedSalihYesilay/YOLO-Based-Road-Damage-Detection, Public, dal main)
-- Eğitim: Kaggle (önerildi, kesin değil) / Colab
+- Eğitim: ağır eğitim Kaggle'da (yedek Colab); analiz, dönüştürme, küçük denemeler, değerlendirme,
+  FPS ölçümü ve arayüz yerelde (ayrıntı: docs/kararlar.md)
+- Model ağırlıkları (`best.pt`) git dışında, GitHub Releases'ta
 
 ## Kesinleşen kararlar
 - Konu: yol hasarı (çatlak/çukur) tespiti
@@ -106,7 +108,6 @@ Boş (etiketsiz) train görüntüleri: 12.658 (%33). Norveç %64, Çek %62, Hind
 - Boş (arka plan) görüntülerin ne kadarının eğitimde tutulacağı
 - Sınıf dengesizliği (D00 26.196, D40 6.544): çukur için kayıp fonksiyonunda
   daha yüksek ağırlık mı, çukura özel augmentation mı, ikisi birden mi
-- Eğitim ortamı (Kaggle önerildi; yerel GTX 1650 4 GB sadece küçük denemeler için)
 - (Ek özellik) Veritabanı ve harita teknolojisi (öneri: SQLite + folium)
 - (Ek özellik) GPS verisi nereden gelecek (telefon, video metadata, vb.)
 
@@ -114,7 +115,7 @@ Boş (etiketsiz) train görüntüleri: 12.658 (%33). Norveç %64, Çek %62, Hind
 ```
 yol-hasari/
   CLAUDE.md        ← bu dosya
-  README.md, .gitignore
+  README.md, .gitignore, requirements.txt
   docs/            ← plan.md, kararlar.md, proje-onerisi.md, arastirma/, ogrenme/
   data/            ← veri seti (git'e girmez)
   reference/       ← referans proje (sadece okunur, değiştirilmez)

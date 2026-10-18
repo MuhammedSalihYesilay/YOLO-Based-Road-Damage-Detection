@@ -43,5 +43,37 @@ Her kayıt: tarih — karar — gerekçe.
 
 ## 2026-10-15 — Git/GitHub: repo, .gitignore, commit'ler yalnızca kendi adımızla
 - **Karar:** Repo https://github.com/MuhammedSalihYesilay/YOLO-Based-Road-Damage-Detection (Public, `main`). data/, reference/, venv/, runs/, *.pt, *.onnx, __pycache__/, kaggle.json git dışında. Commit'lere Claude satırı eklenmez.
-  Ahmet Hakan Yıldırım (GitHub: hakan0363) collaborator olarak davet edildi (2026-10-18).
+  Ahmet Hakan Yıldırım (GitHub: hakan0363) collaborator olarak davet edildi ve kabul etti (2026-10-18).
 - **Gerekçe:** Veri seti 12,9 GB ve lisanslı, referansın lisansı yok, ağırlıklar büyük (nereden indirilecekleri README'de); repo herkese açık olduğu için Kaggle API anahtarı asla girmemeli. Commit geçmişi proje sahiplerini göstermeli.
+
+## 2026-10-18 — Çalışma düzeni: yerel / Kaggle ayrımı
+- **Karar:** Ağır eğitim Kaggle'da. Veri analizi, JSON→YOLO dönüştürme, bölme, küçük deneme eğitimi, final test,
+  değerlendirme, FPS ölçümü ve Streamlit arayüzü yerel bilgisayarda. FPS yalnızca yerelde (GTX 1650) ölçülür.
+- **Gerekçe:** Kaggle'ın haftalık 30 saatlik GPU kotası yalnızca eğitime harcanır. FPS hedefi (≥ 15) GTX 1650 için
+  tanımlı; bulut GPU'sunda ölçülen hız arayüzün çalışacağı donanımı göstermez.
+
+## 2026-10-18 — Kaggle veri ve notebook düzeni
+- **Karar:** Veri Kaggle'a ham haliyle değil, Adım 3'te YOLO formatına çevrilip Norveç küçültüldükten sonra
+  private dataset olarak yüklenir; Hakan dataset'e collaborator olarak eklenir ve kendi hesabıyla da eğitim yapabilir.
+  Notebook'ta cache kapalı; veri `/kaggle/input`'tan okunur, çıktılar `/kaggle/working`'e yazılır.
+- **Gerekçe:** 12,9 GB ham veri yerine küçültülmüş kopya yükleme süresini ve disk kullanımını azaltır.
+  Kota hesap başına olduğu için iki hesap iki kat GPU süresi demek. Kaggle hesabı hazır (telefon doğrulandı;
+  private dataset 214,75 GB, GPU 30 saat/hafta).
+
+## 2026-10-18 — Model ağırlıkları GitHub Releases'ta
+- **Karar:** `best.pt` gibi ağırlıklar git'e girmez; GitHub Releases'a eklenir, README'de bağlantısı verilir.
+- **Gerekçe:** `*.pt` dosyaları büyük ve git geçmişini kalıcı olarak şişirir; Releases dosya başına 2 GB'a kadar izin veriyor
+  ve repo Public olduğu için hocalar/jüri modeli indirebilir.
+
+## 2026-10-18 — Yerel ortam: python.org Python 3.13 + venv + torch cu130
+- **Karar:** venv `venv/` klasöründe, python.org Python 3.13.16 ile (Anaconda'nın 3.13'ü değil). NVIDIA sürücüsü 617.42 olduğu için
+  torch'un CUDA 13.0 derlemesi: torch 2.14.1+cu130, torchvision 0.29.1+cu130, ultralytics 8.4.182, opencv-python 5.0.0.93,
+  pandas 3.0.6, matplotlib 3.11.2. Sürümler `requirements.txt`'te sabit; dosya cu130 deposunu da içerdiği için CUDA derlemesi
+  bu dosyadan kurulunca da geliyor. `torch.cuda.is_available()` → True (GTX 1650, sm_75).
+- **Gerekçe:** Anaconda kendi kütüphaneleriyle ayrı bir dağıtım; üzerine kurulan venv'lerde DLL/SSL sorunları çıkabiliyor.
+  Sürücü ≥ 580 olduğundan 12.6 yerine güncel 13.0 derlemesi seçildi. Sabit sürümler tekrarlanabilirlik için.
+
+## 2026-10-18 — Referansın hazır modeli yeni ultralytics'te açılıyor
+- **Karar:** `YOLOv8_Small_RDD.pt` ultralytics 8.4.182'de doğrudan kullanılacak; ONNX yedek yoluna gerek yok.
+- **Gerekçe:** Bir test görüntüsünde (China_MotorBike_001977) GPU'da tahmin üretti (~20 ms çıkarım). Sınıf sırası
+  (0 Longitudinal, 1 Transverse, 2 Alligator, 3 Potholes) bizim sıramızla aynı; arayüz testinde eşleme sorunu yok.
