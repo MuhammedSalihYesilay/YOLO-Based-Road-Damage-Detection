@@ -100,7 +100,7 @@ Kaynak: tüm ann JSON'ları sayıldı (38.385 train + 9.035 test), görüntü bo
 | 9 | (Yok) | **12.658 boş görüntü (%33)**; Norveç %64, Çek %62, Hindistan %51, ABD %0 | Arka plan oranı kararı. |
 | 10 | Referans Python 3.10 | Referans: Py 3.8, ultralytics 8.0.201, sadece Japonya+Hindistan, v8s, 640, mAP50 0,547 | Karşılaştırma değeri. |
 | 11 | Isı haritası maddesi | Bağlantı bulunamadı | **Kaldırıldı.** |
-| 12 | docs/, src/, .gitignore | src/ ve .gitignore yok, git deposu değil (docs/ oluşturuldu) | Kurulumda. |
+| 12 | docs/, src/, .gitignore | src/ ve .gitignore yok, git deposu değil (docs/ oluşturuldu) | Git kuruldu 2026-10-15; src/ henüz yok. |
 | 13 | Hindistan 720x720 | 960x720 çekilip 720x720'ye sıkıştırılmış | En-boy oranı bozuk. |
 | 14 | Norveç 3650x2044 | Site de böyle diyor ama veride en az görülen boyut; Norveç CVAT ile etiketlenmiş | Veriye güveniyoruz. |
 | 15 | Japonya/Çek 600x600 | Site eksik (madde 6) | Veriye güveniyoruz. |
@@ -113,7 +113,7 @@ Sitede tutanlar: toplamlar (47.420 görüntü, 61.082 etiket, 12,86 GB), sınıf
 ## 7. Adımlar ("Ne öğreneceğim" ve "Hocaya nasıl anlatırım" notlarıyla)
 
 **Adım 0: Kurulum**
-git init + GitHub deposu, `.gitignore` (data/, venv/, runs/, *.pt), venv, `requirements.txt`. (`docs/kararlar.md`, `docs/proje-onerisi.md` ve CLAUDE.md düzeltmeleri 2026-10-15'te yapıldı.)
+~~git init + GitHub deposu, `.gitignore` (data/, reference/, venv/, runs/, *.pt, *.onnx, __pycache__/, kaggle.json)~~ ✅ 2026-10-15; kalan: venv, `requirements.txt`. (`docs/kararlar.md`, `docs/proje-onerisi.md` ve CLAUDE.md düzeltmeleri 2026-10-15'te yapıldı.)
 - NVIDIA sürücüsünü güncelle, torch'u CUDA derlemesiyle kur; hazır modeli yeni ultralytics'te açma testi (ayrıntı: docs/arastirma/python-surumu.md)
 - *Ne öğreneceğim:* venv neden gerekli, git commit/push/branch, iki kişiyle çakışmadan çalışma.
 - *Hocaya:* "Proje sürüm kontrollü ve tekrar kurulabilir; büyük veri ve model dosyaları depoya girmiyor."

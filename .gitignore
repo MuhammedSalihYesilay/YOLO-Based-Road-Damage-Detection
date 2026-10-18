@@ -11,3 +11,6 @@ __pycache__/
 runs/
 *.pt
 *.onnx
+
+# Kaggle API anahtarı (repo herkese açık)
+kaggle.json

@@ -9,7 +9,7 @@ video yükleme, gerçek zamanlı kamera; kutu + sınıf + güven skoru).
 **Ek özellikler (ana kapsam bitince, zaman kalırsa, öncelik sırasıyla):**
 GPS eşleştirme → veritabanına kayıt → harita gösterimi → aynı hasarın zaman içinde takibi.
 
-- Ekip: 2 kişi (ben + takım arkadaşım). Her hafta birbirimize yaptıklarımızı anlatırız;
+- Ekip: 2 kişi (ben + Ahmet Hakan Yıldırım, GitHub: hakan0363, repoda collaborator). Her hafta birbirimize yaptıklarımızı anlatırız;
   ikimiz de projenin tamamını sunabilmeliyiz.
 - Teslim: Aralık sonu / Ocak başı (çizelge: `docs/plan.md` §8)
 - Dil: Python 3.13 (Kaggle/Colab ile aynı; yedek 3.12)
@@ -23,7 +23,7 @@ GPS eşleştirme → veritabanına kayıt → harita gösterimi → aynı hasar�
 - OpenCV (görüntü/video/kamera işleme)
 - Streamlit + streamlit-webrtc (web arayüzü, gerçek zamanlı kamera)
 - pandas, matplotlib (analiz ve grafikler)
-- Git / GitHub
+- Git / GitHub (repo: github.com/MuhammedSalihYesilay/YOLO-Based-Road-Damage-Detection, Public, dal main)
 - Eğitim: Kaggle (önerildi, kesin değil) / Colab
 
 ## Kesinleşen kararlar
@@ -114,6 +114,7 @@ Boş (etiketsiz) train görüntüleri: 12.658 (%33). Norveç %64, Çek %62, Hind
 ```
 yol-hasari/
   CLAUDE.md        ← bu dosya
+  README.md, .gitignore
   docs/            ← plan.md, kararlar.md, proje-onerisi.md, arastirma/, ogrenme/
   data/            ← veri seti (git'e girmez)
   reference/       ← referans proje (sadece okunur, değiştirilmez)
@@ -129,6 +130,7 @@ yol-hasari/
   bu dosyadaki ilgili bölümü de güncelle.
 - `reference/` içindeki dosyaları değiştirme, sadece incele.
 - Veri setindeki görüntüleri tek tek açma; analiz için script yaz ve örneklem kullan.
-- `data/` klasörü `.gitignore`'da olmalı.
+- `data/`, `reference/`, `venv/`, `runs/`, `*.pt`, `*.onnx`, `__pycache__/`, `kaggle.json` git'e girmez (`.gitignore`).
+  Commit mesajlarına Co-Authored-By / "Generated with Claude Code" satırı ekleme.
 - Ortam: Windows, PowerShell, VS Code. Python sanal ortamı (venv) kullan.
 - CLAUDE.md veya docs içindeki bilgilerle çelişen bir şey görürsen değiştirmeden önce bana göster ve onay al.
