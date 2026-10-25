@@ -203,6 +203,8 @@ Kişi A / Kişi B'nin kim olacağı henüz belli değil (§10).
 | 10 | 21–27 Ara | Slaytlar, demo videosu, prova | Slaytlar, demo videosu, prova |
 | 11 | 28 Ara–3 Oca | Tampon + teslim | Tampon + teslim |
 
+Ara rapor 23 Kas 2026 23:00, vize sunumu 24 Kas 2026.
+
 Not: vize/final haftaları ve kesin teslim tarihi bilinince çizelge güncellenecek.
 
 ---
@@ -219,7 +221,7 @@ Not: vize/final haftaları ve kesin teslim tarihi bilinince çizelge güncellene
 3. **Görev dağılımı:** Kişi A / Kişi B kim olacak, belli değil. Branch düzeni önerisi: herkes kendi dalında çalışır, `main`'e Pull Request ile birleştirir.
 4. **`docs/deneyler.md` sütun şablonu** belirlenecek.
 5. **Hindistan'ın bozuk en-boy oranı:** karar verilecek (muhtemelen dokunulmayacak).
-6. **Vize/final tarihleri** belli olunca §8 çizelgesi güncellenecek.
+6. ~~**Vize/final tarihleri** belli olunca §8 çizelgesi güncellenecek.~~ ✅ 2026-10-25 kapandı
 
 ## Doğrulama
 - CLAUDE.md, plan.md ve proje-onerisi.md arasında kapsam, teknoloji ve karar çelişkisi kalmamalı.

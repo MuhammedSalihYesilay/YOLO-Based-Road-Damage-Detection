@@ -11,7 +11,7 @@ GPS eşleştirme → veritabanına kayıt → harita gösterimi → aynı hasar�
 
 - Ekip: 2 kişi (ben + Ahmet Hakan Yıldırım, GitHub: hakan0363, repoda collaborator). Her hafta birbirimize yaptıklarımızı anlatırız;
   ikimiz de projenin tamamını sunabilmeliyiz.
-- Teslim: Aralık sonu / Ocak başı (çizelge: `docs/plan.md` §8)
+- Teslim: ara rapor 23 Kas 2026 23:00, vize sunumu 24 Kas 2026; final Aralık sonu / Ocak başı (çizelge: `docs/plan.md` §8)
 - Dil: Python 3.13 (Kaggle/Colab ile aynı; yedek 3.12)
 - SDG: 11. Sürdürülebilir şehirler ve topluluklar
 - Kategori: Construction / Architecture
@@ -117,6 +117,7 @@ yol-hasari/
   CLAUDE.md        ← bu dosya
   README.md, .gitignore, requirements.txt
   docs/            ← plan.md, kararlar.md, proje-onerisi.md, arastirma/, ogrenme/
+  docs/rapor/ozel/ ← (git dışı)
   data/            ← veri seti (git'e girmez)
   reference/       ← referans proje (sadece okunur, değiştirilmez)
   src/             ← bizim kodumuz (henüz oluşturulmadı)
