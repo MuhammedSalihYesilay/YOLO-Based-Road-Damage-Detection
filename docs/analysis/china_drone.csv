@@ -1,0 +1,10 @@
+,China_Drone,Diğer (Drone hariç)
+images,2401.0,35984.0
+empty_after_pct,20.1,39.0
+boxes_per_nonempty_image,1.6,2.38
+median_area_pct,2.45,1.36
+median_aspect,1.09,1.27
+D00_pct,46.5,47.5
+D10_pct,41.2,20.3
+D20_pct,9.6,19.8
+D40_pct,2.8,12.4

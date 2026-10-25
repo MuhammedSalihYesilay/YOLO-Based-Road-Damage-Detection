@@ -1,0 +1,9 @@
+country,train_images,empty_before,empty_after,test_images,empty_before_pct,empty_after_pct
+China_Drone,2401,482,482,0,20.1,20.1
+China_MotorBike,1977,43,43,500,2.2,2.2
+Czech,2829,1757,1757,709,62.1,62.1
+India,7706,3934,4387,1959,51.1,56.9
+Japan,10506,1195,2606,2627,11.4,24.8
+Norway,8161,5247,5247,2040,64.3,64.3
+United_States,4805,0,0,1200,0.0,0.0
+TOPLAM,38385,12658,14522,9035,33.0,37.8

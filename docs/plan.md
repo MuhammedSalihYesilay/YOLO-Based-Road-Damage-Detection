@@ -122,17 +122,18 @@ Sitede tutanlar: toplamlar (47.420 görüntü, 61.082 etiket, 12,86 GB), sınıf
 - *Ne öğreneceğim:* venv neden gerekli, git commit/push/branch, iki kişiyle çakışmadan çalışma.
 - *Hocaya:* "Proje sürüm kontrollü ve tekrar kurulabilir; büyük veri ve model dosyaları depoya girmiyor."
 
-**Adım 1: Veri analizi** — `src/analysis/analyze_dataset.py` (argparse ile veri yolu ve çıktı klasörü) → `docs/analysis/` (`summary.md` + CSV + PNG)
-Görüntüleri tek tek açmaz; sadece `ann/*.json` okunur, boyut doğrulaması için ülke başına küçük örneklem açılır. Hesaplananlar:
+**Adım 1: Veri analizi** — `src/analysis/analyze_dataset.py` (argparse ile veri yolu ve çıktı klasörü) → `docs/analysis/` (`summary.md` + CSV + PNG, git'e girer); ham tablolar `data/analysis/` (git dışı)
+Görüntü açmaz; sadece `ann/*.json` okunur, boyutlar JSON'daki `size` alanından alınır. Hesaplananlar:
 1. Ülke bazında görüntü sayısı, boş görüntü oranı (4 sınıf filtresinden önce/sonra), boyutlar
 2. Sınıf × ülke tablosu (4 hedef sınıf + atılacaklar)
 3. Görüntü başına etiket sayısı dağılımı
 4. Kutu geometrisi (sınıf ve ülke bazında): normalize alan, genişlik/yükseklik, en-boy oranı; 640'a küçültüldüğünde kaç piksel kaldığı (Norveç kararı için kritik)
-5. Kalite kontrolleri: taşan / sıfır boyutlu kutular, eşleşmeyen ann–img dosyaları, JSON `size` ile gerçek boyutun örneklemde uyuşması
+5. Kalite kontrolleri: taşan / sıfır boyutlu kutular, eşleşmeyen ann–img dosyaları (dosya listesiyle). JSON `size` ile gerçek boyutun uyuşması 2026-10-14'te örneklemle doğrulandı; tekrar edilmez.
 6. Sınıf başına görüntü sayısı; sitedeki değerlerle karşılaştırma (13.657 / 7.744 / 8.412 / 3.674)
 7. Norveç kutu stili (CVAT): diğer ülkelerden farklı mı?
 8. China_Drone ayrı özeti
 9. Bölme önizlemesi: ülke + "boş mu?" bilgisine göre katmanlı %80/10/10 bölmede her parçanın sınıf dağılımı (dosya kopyalanmaz)
+10. Sekans (ardışık kare) kontrolü: dosya adlarında çekim bilgisi yok; numarası ardışık görüntü çiftlerinin kutu benzerliği (IoU) rastgele çiftlerle karşılaştırılır (§10.2)
 - *Ne öğreneceğim:* Supervisely etiket formatı, bounding box kavramı, pandas/matplotlib, sınıf dengesizliği.
 - *Hocaya:* "Modeli eğitmeden önce veriyi tanıdık: hangi sınıf az, hangi ülke farklı, küçük nesne sorunu nerede. Kararlarımız bu analize dayanıyor."
 

@@ -1,0 +1,9 @@
+country,pairs,consec_mean,random_mean,consec_pct_ge_0.5,random_pct_ge_0.5
+China_Drone,1532,0.015,0.012,0.3,0.1
+China_MotorBike,1890,0.045,0.049,0.8,1.1
+Czech,331,0.038,0.04,0.3,0.9
+India,1122,0.057,0.06,1.2,1.1
+Japan,4778,0.045,0.046,1.1,0.9
+Norway,1065,0.027,0.028,0.3,0.3
+United_States,4804,0.04,0.041,0.2,0.3
+TOPLAM,15522,0.04,0.041,0.6,0.6
