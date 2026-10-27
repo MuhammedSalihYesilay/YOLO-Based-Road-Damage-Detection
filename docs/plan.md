@@ -142,11 +142,15 @@ Görüntü açmaz; sadece `ann/*.json` okunur, boyutlar JSON'daki `size` alanın
 - *Ne öğreneceğim:* imgsz, tiling, arka plan görüntüsünün yanlış pozitiflere etkisi, train/val/test ayrımının anlamı.
 - *Hocaya:* "Her kararın gerekçesi analizdeki bir sayıya dayanıyor" (ör. "Norveç'te kutuların %X'i 640'ta 8 pikselin altına düşüyor").
 
-**Adım 3: YOLO formatına dönüştürme + bölme** — `src/data/prepare_yolo.py`, `data.yaml`, bölme listesi dosyaya kaydedilir
+**Adım 3: YOLO formatına dönüştürme + bölme** — `src/data/prepare_yolo.py`, `data.yaml`, bölme listesi dosyaya kaydedilir ([ayrıntı ve tekrar üretme](adimlar/adim-3-veri-hazirlama.md))
 - Supervisely JSON → YOLO txt; eşleme isimle: longitudinal→0, transverse→1, alligator→2, pothole→3, diğerleri atılır.
 - Referanstaki `convertPascal2YOLOv8` mantığı (normalize cx, cy, w, h) örnek alınır (`reference/.../training/0_PrepareDatasetYOLOv8.ipynb`). Referanstaki iki zayıflık düzeltilir: görüntü–etiket eşleştirmesi dosya adıyla yapılır; val'in yanında test parçası da üretilir.
 - 10 GB'ı kopyalamamak için mümkünse hardlink.
 - Adım 2 kararları: Norveç uzun kenar 1280'e küçültülür (JPEG 95); önce ülke + boş/dolu katmanlı bölme (seed 42), sonra yalnızca train'de boşlar ~%10'a indirilir; `Japan_001265.jpg`'daki sıfır boyutlu kutu atılır; bölme listesi dosyaya kaydedilir.
+- ✅ 2026-10-27: `src/data/prepare_yolo.py` → `data/yolo/` (train 21.211 / val 3.838 / test 3.838 görüntü; 55.231 etiket; train boş %10,0, val/test %37,9/%37,8; kenara konan 9.498 boş `train_dropped_empty.txt`'te). Norveç 1280x717, boyut kontrolünde uyuşmazlık yok. 20 örnek çizildi (`draw_samples.py`), gözle onaylandı; bazı Norveç kutuları orijinal etikette gevşek.
+- ✅ Smoke test (`make_smoke_lists.py`: 2.000 train / 400 val, katmanlı): YOLOv8n, 640, 3 epoch, batch 8 → hatasız; ~55 sn/epoch, GPU 2,03 GB; loss'lar düşüyor (cls 5,46→2,99), val mAP50 0,04→0,12. GTX 1650'de Ultralytics AMP'yi kendisi kapattı (NaN yok). Not: `project=runs/smoke` çıktısı `runs/detect/runs/smoke/` altına düştü.
+- *Ne öğrendim:* YOLO etiket formatı (sınıf cx cy w h, 0-1 oran → küçültme etiketi bozmaz), katmanlı bölme ve seed, hardlink (kopyasız ikinci isim), txt listeleriyle veri seti tanımlama, pandas'ta `df.empty` gibi hazır özellik isimleriyle sütun adlandırma tuzağı.
+- *Hocaya:* "38 bin etiketli görüntüyü YOLO formatına çevirdik ve ülke + boş/dolu oranı korunarak %80/10/10 böldük; her parçada sınıf oranları en fazla 1 puan farklı. 20 örneği çizip kontrol ettik, küçük bir deneme eğitimiyle hattın uçtan uca çalıştığını gösterdik."
 - *Ne öğreneceğim:* YOLO etiket formatı (sınıf cx cy w h, normalize), stratified split, seed.
 - *Hocaya:* "Etiketleri modelin anladığı formata çevirdik; %80/10/10 böldük, ülke dağılımı her parçada aynı. 20 rastgele örneği çizip doğruladık."
 

@@ -119,7 +119,8 @@ yol-hasari/
   docs/rapor/ozel/ ← (git dışı)
   data/            ← veri seti (git'e girmez)
   reference/       ← referans proje (sadece okunur, değiştirilmez)
-  src/             ← bizim kodumuz (henüz oluşturulmadı)
+  src/             ← bizim kodumuz (analysis/, data/)
+  data/yolo/       ← YOLO formatlı veri + data.yaml (prepare_yolo.py çıktısı, git dışı)
 ```
 
 ## Çalışma kuralları (Claude için)

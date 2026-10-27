@@ -92,3 +92,8 @@ Her kayıt: tarih — karar — gerekçe.
   sekans sızıntısı işareti yok (ardışık IoU 0,040, rastgele 0,041); önizlemede sınıf oranları en fazla 1 puan farklı.
 - **Küçükler:** `Japan_001265.jpg`'daki sıfır boyutlu kutu atılır; China_Drone ayrı ve "Drone hariç" raporlanır;
   Hindistan en-boy oranına dokunulmaz (train/test aynı bozuk, etiketler normalize; raporda sınırlılık).
+
+## 2026-10-27 — Adım 3 uygulama notları
+- **Boş azaltma liste ile:** kenara konan 9.498 boş train görüntüsünün dosyaları `data/yolo`'da duruyor, sadece `train.txt`'e
+  girmiyor (`train_dropped_empty.txt`). Gerekçe: Adım 6'da "tüm boşlar" denemesi yeniden dönüştürmeden yapılabilir.
+- **Kullanılan boş sayısı 2.121** (kararda ~2.400 yazıyordu). Gerekçe: %10 train'in son hâline göre hesaplandı; 2.400 tüm veriden kaba tahmindi.
