@@ -80,3 +80,15 @@ Her kayıt: tarih — karar — gerekçe.
 
 ## 2026-10-25 — Rapor dosyaları git dışında
 - **Karar:** Rapor dosyaları (duyuru, şablon, taslaklar) `docs/rapor/ozel/`'de, `.gitignore`'da. **Gerekçe:** Repo public; Turnitin taslağı kaynak olarak bulup benzerliği şişirebilir.
+
+## 2026-10-27 — Adım 2 veri kararları
+- **Norveç:** uzun kenar 1280'e küçültülür (JPEG 95); baseline imgsz 640, seçilen modelde 1024. Gerekçe: kutuların
+  %23,5'i 640'ta 8 px altına düşüyor (1024'te %9,9, 1280'de %5,8); 1024 tüm eğitimi ~2,5 kat yavaşlatır.
+- **Boş görüntü:** yalnızca train'de ~%10'a indirilir (~2.400, ülke oranlı, seed 42); val/test doğal (%37,8). Gerekçe:
+  14.522 boş görüntü var, Ultralytics %0–10 öneriyor; epoch ~%30 kısalır, precision gerçekçi ölçülür.
+- **Sınıf dengesizliği:** baseline'da işlem yok; sınıf başına AP ölçülünce Adım 6'da ağırlık/oversampling denenir.
+  Gerekçe: D00:D40 ≈ 4:1, orta düzey; önce sorun ölçülür.
+- **Bölme:** ülke + boş/dolu katmanlı %80/10/10, seed 42; önce bölünür, boş azaltma sonra yalnızca train'de. Gerekçe:
+  sekans sızıntısı işareti yok (ardışık IoU 0,040, rastgele 0,041); önizlemede sınıf oranları en fazla 1 puan farklı.
+- **Küçükler:** `Japan_001265.jpg`'daki sıfır boyutlu kutu atılır; China_Drone ayrı ve "Drone hariç" raporlanır;
+  Hindistan en-boy oranına dokunulmaz (train/test aynı bozuk, etiketler normalize; raporda sınırlılık).

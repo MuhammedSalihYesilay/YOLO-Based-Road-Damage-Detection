@@ -62,7 +62,7 @@ Bu plan v1'in yerini alıyor; v1'deki veri seti bulguları (A bölümü) korunuy
 
 ## 4. Değerlendirme metrikleri ve hedef
 - **Metrikler:** Precision, Recall, F1, **mAP50** (ana metrik, referansla karşılaştırma için), **mAP50-95**, sınıf başına AP, karışıklık matrisi (confusion matrix), PR eğrisi, çıkarım hızı (ms/görüntü ve FPS; hem GPU hem CPU'da). (açıklamalar: docs/ogrenme/metrikler.md)
-- **Kırılımlar:** ülke bazında mAP (özellikle Norveç ve China_Drone), sınıf bazında mAP (D40'ın azınlık sınıfı olarak durumu).
+- **Kırılımlar:** ülke bazında mAP (özellikle Norveç ve China_Drone; ayrıca "Drone hariç" mAP), sınıf bazında mAP (D40'ın azınlık sınıfı olarak durumu).
 - **Hedef:**
   1. Test setinin Japonya+Hindistan alt kümesinde **mAP50 ≥ 0,547** (referansın raporladığı değeri yakalamak/geçmek).
   2. Tüm ülkeler için genel hedef baseline sonrası belirlenecek. Not: Norveç ve Drone eklendiği için genel mAP'ın Japonya+Hindistan'dan düşük çıkması normal.
@@ -73,7 +73,7 @@ Bu plan v1'in yerini alıyor; v1'deki veri seti bulguları (A bölümü) korunuy
 - **Kaggle (önerim):** haftada ~30 saat ücretsiz GPU (P100 / T4x2), oturum en fazla 12 saat; veri seti yüklenip kalıcı tutulabiliyor. Colab yedek seçenek.
 - **İş bölümü (karar, 2026-10-18):** ağır eğitim Kaggle'da; analiz, dönüştürme, bölme, küçük denemeler, final test, değerlendirme, FPS ve arayüz yerelde. FPS yalnızca yerelde (GTX 1650).
 - **Kaggle düzeni (karar, 2026-10-18):** veri Adım 3'ten sonra YOLO formatında, Norveç küçültülmüş halde private dataset olarak yüklenir; Hakan collaborator, kendi hesabıyla da eğitim yapabilir (kota hesap başına). Cache kapalı, veri `/kaggle/input`, çıktılar `/kaggle/working`.
-- **Hazırlık:** Norveç görüntüleri 4040 px. Yüklemeden önce eğitim boyutuna uygun küçültülmüş kopya hazırlamak hem yükleme süresini hem disk kullanımını ciddi azaltır (Norveç boyut kararına bağlı, Adım 2).
+- **Hazırlık:** Norveç görüntüleri 4040 px. Yüklemeden önce eğitim boyutuna uygun küçültülmüş kopya hazırlamak hem yükleme süresini hem disk kullanımını ciddi azaltır (karar 2026-10-27: uzun kenar 1280).
 
 ## 6. Kapsam
 **Ana kapsam (öneri, teslimde olmazsa olmaz):**
@@ -138,6 +138,7 @@ Görüntü açmaz; sadece `ann/*.json` okunur, boyutlar JSON'daki `size` alanın
 - *Hocaya:* "Modeli eğitmeden önce veriyi tanıdık: hangi sınıf az, hangi ülke farklı, küçük nesne sorunu nerede. Kararlarımız bu analize dayanıyor."
 
 **Adım 2: Veri kararları** (Norveç boyutu, arka plan oranı, katmanlı bölme, eğitim ortamı) → kararlar.md
+- ✅ 2026-10-27: Norveç 1280 dosya / imgsz 640 (sonra 1024), train'de boş ~%10, dengesizlik Adım 6'ya, ülke + boş/dolu katmanlı bölme seed 42 (kararlar.md)
 - *Ne öğreneceğim:* imgsz, tiling, arka plan görüntüsünün yanlış pozitiflere etkisi, train/val/test ayrımının anlamı.
 - *Hocaya:* "Her kararın gerekçesi analizdeki bir sayıya dayanıyor" (ör. "Norveç'te kutuların %X'i 640'ta 8 pikselin altına düşüyor").
 
@@ -145,6 +146,7 @@ Görüntü açmaz; sadece `ann/*.json` okunur, boyutlar JSON'daki `size` alanın
 - Supervisely JSON → YOLO txt; eşleme isimle: longitudinal→0, transverse→1, alligator→2, pothole→3, diğerleri atılır.
 - Referanstaki `convertPascal2YOLOv8` mantığı (normalize cx, cy, w, h) örnek alınır (`reference/.../training/0_PrepareDatasetYOLOv8.ipynb`). Referanstaki iki zayıflık düzeltilir: görüntü–etiket eşleştirmesi dosya adıyla yapılır; val'in yanında test parçası da üretilir.
 - 10 GB'ı kopyalamamak için mümkünse hardlink.
+- Adım 2 kararları: Norveç uzun kenar 1280'e küçültülür (JPEG 95); önce ülke + boş/dolu katmanlı bölme (seed 42), sonra yalnızca train'de boşlar ~%10'a indirilir; `Japan_001265.jpg`'daki sıfır boyutlu kutu atılır; bölme listesi dosyaya kaydedilir.
 - *Ne öğreneceğim:* YOLO etiket formatı (sınıf cx cy w h, normalize), stratified split, seed.
 - *Hocaya:* "Etiketleri modelin anladığı formata çevirdik; %80/10/10 böldük, ülke dağılımı her parçada aynı. 20 rastgele örneği çizip doğruladık."
 
@@ -218,10 +220,10 @@ Not: vize/final haftaları ve kesin teslim tarihi bilinince çizelge güncellene
 
 ## 10. Açık konular (2026-10-18; çoğu Adım 1 analizini bekliyor)
 1. **Deney bütçesi:** Hafta 5'teki 4 model karşılaştırması (50 epoch) haftalık 30 saatlik Kaggle kotasına sığmıyor. Adım 4'te baseline'ın epoch süresi ölçülünce iki hesapla ve koşu planıyla yeniden hesaplanacak.
-2. **Ardışık kare (sekans) sızıntısı:** Adım 1'de dosya adlarında sekans/çekim bilgisi var mı bakılacak; varsa bölme sekans bazında yapılacak (aynı sekansın kareleri hem train hem test'e düşmemeli).
+2. ~~**Ardışık kare (sekans) sızıntısı:** Adım 1'de dosya adlarında sekans/çekim bilgisi var mı bakılacak; varsa bölme sekans bazında yapılacak (aynı sekansın kareleri hem train hem test'e düşmemeli).~~ ✅ 2026-10-27 kapandı: sızıntı işareti yok, rastgele katmanlı bölme
 3. **Görev dağılımı:** Kişi A / Kişi B kim olacak, belli değil. Branch düzeni önerisi: herkes kendi dalında çalışır, `main`'e Pull Request ile birleştirir.
 4. **`docs/deneyler.md` sütun şablonu** belirlenecek.
-5. **Hindistan'ın bozuk en-boy oranı:** karar verilecek (muhtemelen dokunulmayacak).
+5. ~~**Hindistan'ın bozuk en-boy oranı:** karar verilecek (muhtemelen dokunulmayacak).~~ ✅ 2026-10-27 kapandı: dokunulmuyor
 6. ~~**Vize/final tarihleri** belli olunca §8 çizelgesi güncellenecek.~~ ✅ 2026-10-25 kapandı
 
 ## Doğrulama

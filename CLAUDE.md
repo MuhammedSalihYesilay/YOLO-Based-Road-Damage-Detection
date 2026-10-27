@@ -60,7 +60,10 @@ GPS eşleştirme → veritabanına kayıt → harita gösterimi → aynı hasar�
   - Lisans: CC BY-SA 4.0. Kaynak/atıf: Arya, Maeda, Sekimoto vd., "RDD2022: A multi-national
     image dataset for automatic Road Damage Detection", 2022, arXiv:2209.08538
 - Veri bölme: resmi test seti etiketsiz olduğu için etiketli train verisi
-  %80 train / %10 val / %10 test olarak ayrılacak, seed sabit
+  %80 train / %10 val / %10 test olarak ayrılacak, seed 42, ülke + boş/dolu katmanlı;
+  boş görüntüler yalnızca train'de ~%10'a indirilir
+- Norveç uzun kenar 1280'e küçültülür; eğitim imgsz 640 (seçilen modelde 1024).
+  Sınıf dengesizliği baseline'da ele alınmaz (Adım 6). Ayrıntı: docs/kararlar.md (2026-10-27)
 - Referans proje: RoadDamageDetection-main
   - Konum: `reference/RoadDamageDetection-main/`
   - PyCharm'da sistem Python'u 3.10 ile CPU'da çalıştırıldı (README: Py 3.8, ultralytics 8.0.201)
@@ -92,7 +95,7 @@ GPS eşleştirme → veritabanına kayıt → harita gösterimi → aynı hasar�
 Görüntü boyutları ülkeye göre farklı (train sayıları; datasetninja'daki ülke sayıları train+test toplamıdır):
 - Japonya: 10.506 görüntü. Çoğu 600x600 (10.187), ayrıca 540x540 (124), 1024x1024 (147), 1080x1080 (48)
 - Çek Cumhuriyeti: 2.829 görüntü, 600x600
-- Hindistan: 7.706 görüntü, 720x720. Orijinali 960x720'den sıkıştırılmış, en-boy oranı bozuk
+- Hindistan: 7.706 görüntü, 720x720. Orijinali 960x720'den sıkıştırılmış, en-boy oranı bozuk; dokunulmuyor
 - ABD: 4.805 görüntü, 640x640
 - Çin: iki alt küme, ikisi de 512x512. China_Drone 2.401 (yukarıdan çekim; test klasöründe yok),
   China_MotorBike 1.977
@@ -101,13 +104,9 @@ Görüntü boyutları ülkeye göre farklı (train sayıları; datasetninja'daki
   (diğerleri LabelImg).
 
 Boş (etiketsiz) train görüntüleri: 12.658 (%33). Norveç %64, Çek %62, Hindistan %51, ABD %0.
-`other corruption` atılınca bu oran daha da artacak.
+`other corruption` atılınca 14.522 (%37,8).
 
 ## Henüz karar verilmeyenler
-- Farklı boyutlardaki görüntüler (özellikle Norveç) ortak boyuta nasıl getirilecek
-- Boş (arka plan) görüntülerin ne kadarının eğitimde tutulacağı
-- Sınıf dengesizliği (D00 26.196, D40 6.544): çukur için kayıp fonksiyonunda
-  daha yüksek ağırlık mı, çukura özel augmentation mı, ikisi birden mi
 - (Ek özellik) Veritabanı ve harita teknolojisi (öneri: SQLite + folium)
 - (Ek özellik) GPS verisi nereden gelecek (telefon, video metadata, vb.)
 
