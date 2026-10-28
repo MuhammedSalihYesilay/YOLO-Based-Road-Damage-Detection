@@ -156,6 +156,7 @@ Görüntü açmaz; sadece `ann/*.json` okunur, boyutlar JSON'daki `size` alanın
 
 **Adım 4: Baseline eğitim** (önce yerelde YOLOv8n ile kısa deneme, sonra Kaggle'da referans ayarları: v8s, 640)
 - **Checkpoint ile devam:** Kaggle oturumu en fazla 12 saat sürüyor. Eğitim her epoch sonunda `last.pt` kaydeder (ayrıca `save_period` ile ara kayıtlar alınır). Çıktı klasörü oturum bitmeden Kaggle "output/dataset" olarak saklanır. Yeni oturumda `YOLO("last.pt").train(resume=True)` ile kaldığı epoch'tan devam edilir. İlk denemede bilerek yarıda kesip devam ettirerek bu akış test edilir. Referans projedeki "Resume Training" hücresi örnek alınır (`reference/.../training/1_TrainingYOLOv8.ipynb`).
+- ✅ 2026-10-28: zip + notebook hazır (`src/kaggle/pack_dataset.py` → `data/kaggle_upload/rdd2022_yolo.zip`, `notebooks/train_baseline.ipynb`). Sırada: Kaggle'a yükleme, deneme + resume testi, epoch süresi ([ayrıntı](adimlar/adim-4-baseline-egitim.md))
 - *Ne öğreneceğim:* epoch, batch, öğrenme oranı, transfer learning (COCO ön-eğitimli ağırlıklar), loss eğrilerini okumak, overfitting, checkpoint/resume mantığı.
 - *Hocaya:* "Sıfırdan değil, önceden eğitilmiş bir modeli kendi verimize uyarladık (transfer learning). Bu baseline'ımız."
 
