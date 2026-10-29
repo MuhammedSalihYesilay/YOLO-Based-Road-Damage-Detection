@@ -97,3 +97,9 @@ Her kayıt: tarih — karar — gerekçe.
 - **Boş azaltma liste ile:** kenara konan 9.498 boş train görüntüsünün dosyaları `data/yolo`'da duruyor, sadece `train.txt`'e
   girmiyor (`train_dropped_empty.txt`). Gerekçe: Adım 6'da "tüm boşlar" denemesi yeniden dönüştürmeden yapılabilir.
 - **Kullanılan boş sayısı 2.121** (kararda ~2.400 yazıyordu). Gerekçe: %10 train'in son hâline göre hesaplandı; 2.400 tüm veriden kaba tahmindi.
+
+## 2026-10-29 — Baseline ve ortak eğitim ayarları
+- **Karar:** Baseline = YOLOv8s, imgsz 640, 50 epoch (val mAP50 0,589). Adım 6'daki "aynı ayarlar" bu koşunun ayarlarıdır:
+  batch 16, patience 10, save_period 5, seed 42, cache kapalı, workers 4, Ultralytics varsayılan augmentation.
+- **Gerekçe:** Karşılaştırmada tek değişken değişmeli. Ayarlar T4'te sorunsuz çalıştı (~4,5 dk/epoch, ilk epoch ~25 dk).
+  Ayrıntı: [adim-4-baseline-egitim.md](adimlar/adim-4-baseline-egitim.md)

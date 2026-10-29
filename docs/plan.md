@@ -154,9 +154,11 @@ Görüntü açmaz; sadece `ann/*.json` okunur, boyutlar JSON'daki `size` alanın
 - *Ne öğreneceğim:* YOLO etiket formatı (sınıf cx cy w h, normalize), stratified split, seed.
 - *Hocaya:* "Etiketleri modelin anladığı formata çevirdik; %80/10/10 böldük, ülke dağılımı her parçada aynı. 20 rastgele örneği çizip doğruladık."
 
-**Adım 4: Baseline eğitim** (önce yerelde YOLOv8n ile kısa deneme, sonra Kaggle'da referans ayarları: v8s, 640)
+**Adım 4: Baseline eğitim** ✅ (önce yerelde YOLOv8n ile kısa deneme, sonra Kaggle'da referans ayarları: v8s, 640) ([ayrıntı](adimlar/adim-4-baseline-egitim.md))
 - **Checkpoint ile devam:** Kaggle oturumu en fazla 12 saat sürüyor. Eğitim her epoch sonunda `last.pt` kaydeder (ayrıca `save_period` ile ara kayıtlar alınır). Çıktı klasörü oturum bitmeden Kaggle "output/dataset" olarak saklanır. Yeni oturumda `YOLO("last.pt").train(resume=True)` ile kaldığı epoch'tan devam edilir. İlk denemede bilerek yarıda kesip devam ettirerek bu akış test edilir. Referans projedeki "Resume Training" hücresi örnek alınır (`reference/.../training/1_TrainingYOLOv8.ipynb`).
 - ✅ 2026-10-28: zip + notebook hazır (`src/kaggle/pack_dataset.py` → `data/kaggle_upload/rdd2022_yolo.zip`, `notebooks/train_baseline.ipynb`). Sırada: Kaggle'a yükleme, deneme + resume testi, epoch süresi ([ayrıntı](adimlar/adim-4-baseline-egitim.md))
+- ✅ 2026-10-29: Kaggle'da deneme + resume testi başarılı (1. epoch sonrası durdurulup `last.pt`'den devam edildi). Asıl eğitim: YOLOv8s, 640, 50 epoch, T4'te 4 sa 55 dk; early stopping devreye girmedi, son 5 epoch yatay. **val mAP50 0,589**, mAP50-95 0,304; en zayıf D40 (0,482), en iyi D20 (0,695). Epoch ~4,5 dk (ilk epoch ~25 dk, ilk okuma yavaş). `best.pt` yerelde `runs/kaggle/baseline_v8s/`. Test setine bakılmadı (Adım 5).
+- *Ne öğrendim:* transfer learning, checkpoint/resume, loss ve mAP eğrisinin doyması (son epoch'larda yatay), ilk okuma önbelleğinin epoch süresine etkisi, val sonucu ile test sonucunun farkı.
 - *Ne öğreneceğim:* epoch, batch, öğrenme oranı, transfer learning (COCO ön-eğitimli ağırlıklar), loss eğrilerini okumak, overfitting, checkpoint/resume mantığı.
 - *Hocaya:* "Sıfırdan değil, önceden eğitilmiş bir modeli kendi verimize uyarladık (transfer learning). Bu baseline'ımız."
 
@@ -224,7 +226,7 @@ Not: vize/final haftaları ve kesin teslim tarihi bilinince çizelge güncellene
 - `docs/kararlar.md` oluşturuldu.
 
 ## 10. Açık konular (2026-10-18; çoğu Adım 1 analizini bekliyor)
-1. **Deney bütçesi:** Hafta 5'teki 4 model karşılaştırması (50 epoch) haftalık 30 saatlik Kaggle kotasına sığmıyor. Adım 4'te baseline'ın epoch süresi ölçülünce iki hesapla ve koşu planıyla yeniden hesaplanacak.
+1. **Deney bütçesi:** Hafta 5'teki 4 model karşılaştırması (50 epoch) haftalık 30 saatlik Kaggle kotasına sığmıyor. Adım 4'te baseline'ın epoch süresi ölçülünce iki hesapla ve koşu planıyla yeniden hesaplanacak. *2026-10-29: ölçüldü — v8s/640/50 epoch ≈ 5 saat (T4); hesap Adım 6 öncesi yapılacak.*
 2. ~~**Ardışık kare (sekans) sızıntısı:** Adım 1'de dosya adlarında sekans/çekim bilgisi var mı bakılacak; varsa bölme sekans bazında yapılacak (aynı sekansın kareleri hem train hem test'e düşmemeli).~~ ✅ 2026-10-27 kapandı: sızıntı işareti yok, rastgele katmanlı bölme
 3. **Görev dağılımı:** Kişi A / Kişi B kim olacak, belli değil. Branch düzeni önerisi: herkes kendi dalında çalışır, `main`'e Pull Request ile birleştirir.
 4. **`docs/deneyler.md` sütun şablonu** belirlenecek.

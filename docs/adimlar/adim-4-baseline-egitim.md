@@ -48,11 +48,57 @@ Kaynaktan doğrulananlar (ultralytics 8.4.182):
 - `project` mutlak yolsa olduğu gibi kullanılır; göreliyse başına `runs/detect` eklenir (Adım 3'teki sürpriz bunun sonucuydu).
 - Listedeki `./` ile başlayan satırlar, listenin bulunduğu klasöre göre çözülür → zip'teki listeler Kaggle'da değişmeden çalışır.
 
-## Sırada
-1. Zip'i Kaggle'a private dataset olarak yükle (Hakan'ı collaborator ekle).
-2. Notebook'u Kaggle'a import et, GPU T4 + Internet aç, dataset'i input olarak ekle.
-3. Deneme koşusu → 1. epoch'tan sonra durdur → resume ile devam ettir. Epoch süresini not al (plan.md açık konu 1: kota hesabı).
-4. Asıl eğitim (Save & Run All).
+## Kaggle'da yapılanlar (2026-10-29, tarayıcıdan)
+
+### Yükleme
+- Zip private dataset olarak yüklendi; dataset adı **`rdd2022-yolo`** (tireli; notebook açıklamasında `rdd2022_yolo` yazıyor,
+  kod `data.yaml`'ı aradığı için fark etmedi). Kaggle zip'i açtı: 57,8 bin dosya, klasör düzeni doğru.
+- Notebook import edildi (Kaggle'daki adı `notebook8cccb874dd`). Accelerator **GPU T4 x2**, Internet açık.
+  Kodda `device=0` olduğu için eğitim tek T4'te koştu.
+
+### Deneme + resume testi (interaktif oturum)
+- Veri kontrolü geçti: 21.211 / 3.838 / 3.838; liste, görüntü ve etiket sayıları tuttu.
+- **"Slow image access":** ilk okumada 0,8 MB/s; etiket taraması ~20 dk, **1. epoch ~25 dk**. 2. epoch'tan itibaren dosyalar
+  önbellekte: **~3 dk 53 sn eğitim + ~25 sn val ≈ 4,5 dk/epoch**. Yavaşlık sadece ilk okumada; veriyi yerel diske
+  kopyalamaya gerek kalmadı.
+- **Resume çalıştı:** 1. epoch sonrası durduruldu; `RESUME=True` ile log'da
+  `Resuming training .../deneme/weights/last.pt from epoch 2 to 3 total epochs`.
+- val mAP50: epoch 1 → 0,131, 2 → 0,203, 3 → 0,329. Oturum ~1 sa 15 dk kota harcadı.
+
+### Asıl eğitim (baseline)
+- `RUN_TRIAL=False`, `RESUME=False`, `RUN_MAIN=True` → Save & Run All (Commit), versiyon "baseline v8s".
+- `args.yaml`: yolov8s.pt, imgsz 640, epochs 50, batch 16, patience 10, save_period 5, seed 42, cache false, workers 4, amp true.
+- Süre **4 sa 55 dk** (T4). 50 epoch'un hepsi bitti, early stopping devreye girmedi; son 5 epoch'ta val mAP50
+  0,588–0,590 arasında yatay → model doymuş.
+
+### Sonuç (val seti, `best.pt`)
+| Sınıf | P | R | mAP50 | mAP50-95 |
+|---|---|---|---|---|
+| Tümü | 0,629 | 0,555 | **0,589** | 0,304 |
+| D00 boyuna | 0,624 | 0,566 | 0,592 | 0,329 |
+| D10 enine | 0,613 | 0,569 | 0,589 | 0,299 |
+| D20 timsah | 0,686 | 0,644 | 0,695 | 0,383 |
+| D40 çukur | 0,594 | 0,442 | 0,482 | 0,205 |
+
+- Çıkarım 4,2 ms/görüntü (T4; FPS hedefi GTX 1650'de ölçülür, Adım 5).
+- **Bu değerler val setinde.** Test setine bakılmadı; referansın 0,547'siyle karşılaştırma Adım 5'te test setinin
+  Japonya+Hindistan alt kümesinde yapılacak.
+- D40 en zayıf sınıf (en az örnekli sınıf, beklenen) → Adım 6.
+
+### İndirilen dosyalar (yerel, git dışı: `runs/kaggle/baseline_v8s/`)
+`weights/best.pt` (22,5 MB), `args.yaml`, `results.csv`, `results.png`, `confusion_matrix*.png`, `Box{F1,P,PR,R}_curve.png`,
+`val_batch0_pred.jpg`. İndirilmeyenler (`last.pt`, `epoch*.pt`, `train_batch*.jpg`, `labels.jpg`, `deneme/`) Kaggle'daki
+Version 1 Output'unda duruyor.
+
+### Kota
+Bu hafta ≈ 6,3 saat (30 saatten). Ölçülen süre: ilk epoch ~25 dk + sonraki her epoch ~4,5 dk → v8s/640/50 epoch ≈ 5 saat.
+
+## Açık işler
+- Hakan dataset'e collaborator olarak eklenmedi.
+- `best.pt` GitHub Releases'a yüklenmedi (karar 2026-10-18).
+- Repodaki notebook'ta bayraklar deneme ayarında (`RUN_TRIAL=True`), Kaggle'daki kopyada `RUN_MAIN=True`; repoda hangisinin
+  tutulacağına karar verilecek.
+- **Sırada Adım 5:** test seti değerlendirmesi, Japonya+Hindistan alt kümesi, ülke/sınıf kırılımı, GTX 1650'de FPS.
 
 ## Karşılaşılan sorunlar
 1. **`PurePosixPath` ve `./`:** `PurePosixPath("./images/train/X.jpg").parts` → `("images", "train", "X.jpg")`; baştaki `.`
@@ -62,4 +108,6 @@ Kaynaktan doğrulananlar (ultralytics 8.4.182):
 ## Hocaya nasıl anlatırız
 "Veriyi Kaggle'a ham değil, hazırladığımız YOLO formatında yükledik; zip'i oluşturan script listelerdeki her satırın
 zip içinde karşılığı olduğunu kontrol ediyor. Kaggle oturumu 12 saatle sınırlı olduğu için eğitim her epoch'ta
-checkpoint kaydediyor; bunu önce kısa bir denemede bilerek yarıda kesip kaldığı yerden devam ettirerek test ettik."
+checkpoint kaydediyor; bunu önce kısa bir denemede bilerek yarıda kesip kaldığı yerden devam ettirerek test ettik.
+COCO'da ön-eğitimli YOLOv8s'i kendi verimize uyarladık (transfer learning): 50 epoch, T4'te ~5 saat, val mAP50 0,589.
+Bu bizim baseline'ımız; sonraki her deney bununla karşılaştırılacak. En zayıf sınıf en az örneği olan çukur (0,48)."
