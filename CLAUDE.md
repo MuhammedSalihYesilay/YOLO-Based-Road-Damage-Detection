@@ -87,6 +87,9 @@ GPS eşleştirme → veritabanına kayıt → harita gösterimi → aynı hasar�
   **raporladığı** değer; farklı görüntülerde ölçüldüğü için karşılaştırma yaklaşık).
   Gerçek zamanlı kamerada GTX 1650'de ≥ 15 FPS.
 - Test parçası yalnızca en sonda, seçilen model için bir kez kullanılır; model seçimi val ile yapılır.
+- Ölçüm yolu: tüm modeller `src/eval/evaluate.py` ile yerelde FP32 ölçülür, bu değer esas alınır (baseline val
+  mAP50 0,571; Kaggle'ın eğitim sonu değeri 0,589 yalnızca not). GTX 1650'de FP16 bozuk (mAP50 0,04): FPS ve arayüz FP32.
+  Sonuç tablosu: `docs/deneyler.md` (kararlar.md, 2026-10-30)
 - Referansın hazır modeli (`YOLOv8_Small_RDD.pt`) bizim test setimizde **ölçülmez**:
   aynı havuzdaki Japonya+Hindistan train görüntüleriyle eğitildi (veri sızıntısı).
   Sadece arayüzün çalıştığını test etmek için kullanılır.
@@ -119,7 +122,9 @@ yol-hasari/
   docs/rapor/ozel/ ← (git dışı)
   data/            ← veri seti (git'e girmez)
   reference/       ← referans proje (sadece okunur, değiştirilmez)
-  src/             ← bizim kodumuz (analysis/, data/)
+  src/             ← bizim kodumuz (analysis/, data/, eval/)
+  docs/degerlendirme/ ← değerlendirme özetleri (evaluate.py / measure_fps.py kopyası, git'e girer)
+  runs/eval/       ← değerlendirme ham çıktıları (git dışı)
   data/yolo/       ← YOLO formatlı veri + data.yaml (prepare_yolo.py çıktısı, git dışı)
   src/kaggle/      ← Kaggle'a yüklenecek zip'i hazırlayan script (pack_dataset.py)
   data/kaggle_upload/ ← Kaggle'a yüklenecek zip (pack_dataset.py çıktısı, git dışı)
@@ -130,6 +135,8 @@ yol-hasari/
 - Benimle Türkçe konuş, kısa ve net ol.
 - Kod yazmadan önce planı göster, onayımı al. Ne yaptığını ve neden yaptığını açıkla;
   projeyi anlamam ve sunabilmem gerekiyor.
+- Yazdığın her koda Türkçe açıklama yorumları ekle: her fonksiyonun başında ne yaptığını, önemli satırların
+  yanında neden yapıldığını yaz. Kodu okuyup anlayabilmem ve sunabilmem lazım.
 - Her adımda bu adımda ne öğreneceğimi ve hocaya nasıl anlatacağımı açıkla.
 - Önemli bir karar alındığında `docs/kararlar.md` dosyasına tarih, karar ve gerekçe olarak ekle,
   bu dosyadaki ilgili bölümü de güncelle.

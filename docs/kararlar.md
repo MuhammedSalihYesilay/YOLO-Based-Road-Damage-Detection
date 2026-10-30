@@ -103,3 +103,20 @@ Her kayıt: tarih — karar — gerekçe.
   batch 16, patience 10, save_period 5, seed 42, cache kapalı, workers 4, Ultralytics varsayılan augmentation.
 - **Gerekçe:** Karşılaştırmada tek değişken değişmeli. Ayarlar T4'te sorunsuz çalıştı (~4,5 dk/epoch, ilk epoch ~25 dk).
   Ayrıntı: [adim-4-baseline-egitim.md](adimlar/adim-4-baseline-egitim.md)
+
+## 2026-10-30 — Adım 5 yalnızca val; test Adım 9'da
+- **Karar:** Adım 5'te yalnızca val seti ölçülür. Japonya+Hindistan alt kümesinin val değeri referansın 0,547'siyle
+  yalnızca **ön karşılaştırma**; kesin karşılaştırma Adım 9'da, seçilen modelle test setinde bir kez yapılır.
+  `evaluate.py` test setini yalnızca `--final` bayrağıyla açar.
+- **Gerekçe:** Test seti model seçiminden önce görülürse sonuç iyimser olur ("kopya"). Plan'da Adım 5 için yazılan
+  "val/test" bu kararla Adım 9'a kaydı.
+
+## 2026-10-30 — Resmî değer: yerel FP32 ölçüm (evaluate.py)
+- **Karar:** Tüm modeller bizim `src/eval/evaluate.py` ile **yerelde, FP32** ölçülür; raporda ve `deneyler.md`'de bu
+  değer esas alınır. Baseline val mAP50 = **0,571** (mAP50-95 0,286). Kaggle'ın eğitim sonunda verdiği 0,589 yalnızca
+  "eğitim sonu değeri" olarak not edilir.
+- **Gerekçe:** Aynı `best.pt` ve aynı val etiketleriyle (sınıf başına etiket sayıları birebir aynı) yerelde 0,571 çıktı.
+  Batch 32 ve CPU'da da 0,571 → yerel ölçüm kararlı. Kaggle'ın son ölçümü FP16 ile yapılıyor (eğitimdeki AMP ayarı
+  `quantize=16` olarak validator'da kalıyor); fark araştırması burada kapatıldı. Tek, tekrar üretilebilir ölçüm yolu
+  deneyleri birbiriyle adil karşılaştırır.
+- **FP16:** GTX 1650'de FP16 bozuk sonuç veriyor (val mAP50 **0,04**). FPS ölçümü ve arayüz **FP32** ile yapılır.

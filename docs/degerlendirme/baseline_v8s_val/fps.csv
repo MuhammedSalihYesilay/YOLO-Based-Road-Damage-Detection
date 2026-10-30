@@ -1,0 +1,3 @@
+cihaz,imgsz,görüntü,ms ort,ms medyan,ms p95,FPS,ön işleme ms,çıkarım ms,son işleme ms,kutu/görüntü
+GPU,640,201,18.78,19.81,21.38,53.24,1.69,15.34,1.42,1.40
+CPU,640,50,104.85,102.05,127.30,9.54,2.74,99.98,0.68,1.42

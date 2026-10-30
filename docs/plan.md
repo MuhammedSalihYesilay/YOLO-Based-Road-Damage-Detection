@@ -157,14 +157,18 @@ Görüntü açmaz; sadece `ann/*.json` okunur, boyutlar JSON'daki `size` alanın
 **Adım 4: Baseline eğitim** ✅ (önce yerelde YOLOv8n ile kısa deneme, sonra Kaggle'da referans ayarları: v8s, 640) ([ayrıntı](adimlar/adim-4-baseline-egitim.md))
 - **Checkpoint ile devam:** Kaggle oturumu en fazla 12 saat sürüyor. Eğitim her epoch sonunda `last.pt` kaydeder (ayrıca `save_period` ile ara kayıtlar alınır). Çıktı klasörü oturum bitmeden Kaggle "output/dataset" olarak saklanır. Yeni oturumda `YOLO("last.pt").train(resume=True)` ile kaldığı epoch'tan devam edilir. İlk denemede bilerek yarıda kesip devam ettirerek bu akış test edilir. Referans projedeki "Resume Training" hücresi örnek alınır (`reference/.../training/1_TrainingYOLOv8.ipynb`).
 - ✅ 2026-10-28: zip + notebook hazır (`src/kaggle/pack_dataset.py` → `data/kaggle_upload/rdd2022_yolo.zip`, `notebooks/train_baseline.ipynb`). Sırada: Kaggle'a yükleme, deneme + resume testi, epoch süresi ([ayrıntı](adimlar/adim-4-baseline-egitim.md))
-- ✅ 2026-10-29: Kaggle'da deneme + resume testi başarılı (1. epoch sonrası durdurulup `last.pt`'den devam edildi). Asıl eğitim: YOLOv8s, 640, 50 epoch, T4'te 4 sa 55 dk; early stopping devreye girmedi, son 5 epoch yatay. **val mAP50 0,589**, mAP50-95 0,304; en zayıf D40 (0,482), en iyi D20 (0,695). Epoch ~4,5 dk (ilk epoch ~25 dk, ilk okuma yavaş). `best.pt` yerelde `runs/kaggle/baseline_v8s/`. Test setine bakılmadı (Adım 5).
+- ✅ 2026-10-29: Kaggle'da deneme + resume testi başarılı (1. epoch sonrası durdurulup `last.pt`'den devam edildi). Asıl eğitim: YOLOv8s, 640, 50 epoch, T4'te 4 sa 55 dk; early stopping devreye girmedi, son 5 epoch yatay. **val mAP50 0,589**, mAP50-95 0,304; en zayıf D40 (0,482), en iyi D20 (0,695). Epoch ~4,5 dk (ilk epoch ~25 dk, ilk okuma yavaş). `best.pt` yerelde `runs/kaggle/baseline_v8s/`. Test setine bakılmadı (Adım 9). Not: bunlar Kaggle'ın eğitim sonu değerleri; resmî değer yerel ölçüm, val mAP50 0,571 (Adım 5).
 - *Ne öğrendim:* transfer learning, checkpoint/resume, loss ve mAP eğrisinin doyması (son epoch'larda yatay), ilk okuma önbelleğinin epoch süresine etkisi, val sonucu ile test sonucunun farkı.
 - *Ne öğreneceğim:* epoch, batch, öğrenme oranı, transfer learning (COCO ön-eğitimli ağırlıklar), loss eğrilerini okumak, overfitting, checkpoint/resume mantığı.
 - *Hocaya:* "Sıfırdan değil, önceden eğitilmiş bir modeli kendi verimize uyarladık (transfer learning). Bu baseline'ımız."
 
-**Adım 5: Değerlendirme script'i** — `src/eval/`: val/test metrikleri, ülke ve sınıf kırılımı, Japonya+Hindistan alt kümesi, FPS ölçümü → `docs/deneyler.md`
-- *Ne öğreneceğim:* IoU, precision/recall, mAP50 ile mAP50-95 farkı, confusion matrix okuma.
-- *Hocaya:* "mAP50, tahmin kutusu gerçek kutuyla en az %50 örtüşünce doğru sayılan ortalama kesinlik. Bizim modeli Japonya+Hindistan alt kümesinde ölçüp referansın raporladığı 0,547 ile karşılaştırdık."
+**Adım 5: Değerlendirme script'i** ✅ — `src/eval/`: val metrikleri (test Adım 9'da), ülke ve sınıf kırılımı, Japonya+Hindistan alt kümesi, FPS ölçümü → `docs/deneyler.md` ([ayrıntı](adimlar/adim-5-degerlendirme.md))
+- ✅ 2026-10-30: `src/eval/evaluate.py` (val bir kez koşar, alt kümeler Ultralytics'in görüntü başına sonuçlarından hesaplanır; test yalnızca `--final` ile) ve `src/eval/measure_fps.py`. Özetler `docs/degerlendirme/baseline_v8s_val/` (git), ham çıktılar `runs/eval/` (git dışı).
+- ✅ Baseline val (yerel FP32): **mAP50 0,571**, mAP50-95 0,286; D40 0,464 en zayıf, D20 0,679 en iyi. Norveç 0,295 (en zayıf ülke), China_MotorBike 0,882, China_Drone 0,593, Drone hariç 0,568, **Japonya+Hindistan 0,522** (referansın 0,547'sinin altında; ön karşılaştırma). GTX 1650'de **53,2 FPS** (hedef 15 ✅), CPU 9,5 FPS.
+- ✅ Karar: resmî değer yerel FP32 ölçüm (Kaggle'ın eğitim sonu 0,589'u yalnızca not; batch 32 ve CPU'da da 0,571). GTX 1650'de FP16 bozuk (mAP50 0,04) → FPS ve arayüz FP32 (kararlar.md, 2026-10-30).
+- Not: ilk koşuda Ultralytics `data/yolo/labels/val.cache`'i yeniden yazdı (smoke testinden kalan 400 görüntülük cache'ti); görüntü ve etiketler değişmedi.
+- *Ne öğrendim:* IoU eşiği, TP/FP, precision/recall/F1, mAP50 ile mAP50-95 farkı, confusion matrix okuma, alt küme mAP'sinin ayrı hesaplanması, FPS ölçümünde ısınma ve GPU senkronizasyonu, aynı modelin farklı ortam/hassasiyette farklı sonuç verebilmesi.
+- *Hocaya:* "mAP50, tahmin kutusu gerçek kutuyla en az %50 örtüşünce doğru sayılan ortalama kesinlik. Modeli sınıf ve ülke bazında ölçtük; en zayıf yer Norveç ve çukur sınıfı. Japonya+Hindistan'da val'de 0,522 aldık; referansın 0,547'siyle kesin karşılaştırmayı test setinde yapacağız. GTX 1650'de 53 FPS, gerçek zamanlı hedefin üç katı."
 
 **Adım 6: Karşılaştırma deneyleri** (val üzerinde)
 - Modeller: YOLOv8s, YOLO11s, YOLO26s + kamera için YOLO26n; aynı ayarlarla 50 epoch + early stopping; seçilen modelde imgsz 640 ve 960/1024 deneyi (ayrıntı: docs/arastirma/yolo-modelleri.md)
@@ -229,7 +233,7 @@ Not: vize/final haftaları ve kesin teslim tarihi bilinince çizelge güncellene
 1. **Deney bütçesi:** Hafta 5'teki 4 model karşılaştırması (50 epoch) haftalık 30 saatlik Kaggle kotasına sığmıyor. Adım 4'te baseline'ın epoch süresi ölçülünce iki hesapla ve koşu planıyla yeniden hesaplanacak. *2026-10-29: ölçüldü — v8s/640/50 epoch ≈ 5 saat (T4); hesap Adım 6 öncesi yapılacak.*
 2. ~~**Ardışık kare (sekans) sızıntısı:** Adım 1'de dosya adlarında sekans/çekim bilgisi var mı bakılacak; varsa bölme sekans bazında yapılacak (aynı sekansın kareleri hem train hem test'e düşmemeli).~~ ✅ 2026-10-27 kapandı: sızıntı işareti yok, rastgele katmanlı bölme
 3. **Görev dağılımı:** Kişi A / Kişi B kim olacak, belli değil. Branch düzeni önerisi: herkes kendi dalında çalışır, `main`'e Pull Request ile birleştirir.
-4. **`docs/deneyler.md` sütun şablonu** belirlenecek.
+4. ~~**`docs/deneyler.md` sütun şablonu** belirlenecek.~~ ✅ 2026-10-30 kapandı: Ayarlar + Sonuçlar (val) tabloları
 5. ~~**Hindistan'ın bozuk en-boy oranı:** karar verilecek (muhtemelen dokunulmayacak).~~ ✅ 2026-10-27 kapandı: dokunulmuyor
 6. ~~**Vize/final tarihleri** belli olunca §8 çizelgesi güncellenecek.~~ ✅ 2026-10-25 kapandı
 
@@ -237,6 +241,6 @@ Not: vize/final haftaları ve kesin teslim tarihi bilinince çizelge güncellene
 - CLAUDE.md, plan.md ve proje-onerisi.md arasında kapsam, teknoloji ve karar çelişkisi kalmamalı.
 - Adım 1: toplamlar tutmalı (38.385 görüntü / 61.082 etiket / D00 26.196 / D10 11.875 / D20 10.617 / D40 6.544).
 - Adım 3: 20 rastgele örnek kutularıyla çizilip göz kontrolü; `yolo val/train` veri setini hatasız taramalı.
-- Adım 5: bizim modelin Japonya+Hindistan test alt kümesindeki mAP50'si, referansın **raporladığı** 0,547 ile karşılaştırılır.
+- Adım 9: bizim modelin Japonya+Hindistan test alt kümesindeki mAP50'si, referansın **raporladığı** 0,547 ile karşılaştırılır (Adım 5'te val'de ön karşılaştırma yapıldı: 0,522).
 - **Referansın hazır modeli (`YOLOv8_Small_RDD.pt`) bizim test setimizde ölçülmez.** Aynı havuzdaki Japonya+Hindistan train görüntüleriyle eğitildi; bizim test görüntülerimizin bir kısmını görmüş olabilir (veri sızıntısı). Yalnızca arayüzün uçtan uca çalıştığını test etmek için kullanılır (Adım 7-8).
 - Not: 0,547 referansın kendi val bölmesinde, farklı görüntülerde ölçüldü. Karşılaştırma yaklaşık; raporda böyle belirtilecek.

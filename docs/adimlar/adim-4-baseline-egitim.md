@@ -81,8 +81,10 @@ Kaynaktan doğrulananlar (ultralytics 8.4.182):
 | D40 çukur | 0,594 | 0,442 | 0,482 | 0,205 |
 
 - Çıkarım 4,2 ms/görüntü (T4; FPS hedefi GTX 1650'de ölçülür, Adım 5).
-- **Bu değerler val setinde.** Test setine bakılmadı; referansın 0,547'siyle karşılaştırma Adım 5'te test setinin
+- **Bu değerler val setinde.** Test setine bakılmadı; referansın 0,547'siyle kesin karşılaştırma Adım 9'da test setinin
   Japonya+Hindistan alt kümesinde yapılacak.
+- **Not (2026-10-30):** bunlar Kaggle'ın eğitim sonu (FP16) değerleri. Resmî değer yerel FP32 ölçüm: val mAP50 **0,571**
+  ([adim-5-degerlendirme.md](adim-5-degerlendirme.md), kararlar.md 2026-10-30).
 - D40 en zayıf sınıf (en az örnekli sınıf, beklenen) → Adım 6.
 
 ### İndirilen dosyalar (yerel, git dışı: `runs/kaggle/baseline_v8s/`)
@@ -98,7 +100,7 @@ Bu hafta ≈ 6,3 saat (30 saatten). Ölçülen süre: ilk epoch ~25 dk + sonraki
 - `best.pt` GitHub Releases'a yüklenmedi (karar 2026-10-18).
 - Repodaki notebook'ta bayraklar deneme ayarında (`RUN_TRIAL=True`), Kaggle'daki kopyada `RUN_MAIN=True`; repoda hangisinin
   tutulacağına karar verilecek.
-- **Sırada Adım 5:** test seti değerlendirmesi, Japonya+Hindistan alt kümesi, ülke/sınıf kırılımı, GTX 1650'de FPS.
+- **Sırada Adım 5:** val seti değerlendirmesi (test Adım 9'da), Japonya+Hindistan alt kümesi, ülke/sınıf kırılımı, GTX 1650'de FPS.
 
 ## Karşılaşılan sorunlar
 1. **`PurePosixPath` ve `./`:** `PurePosixPath("./images/train/X.jpg").parts` → `("images", "train", "X.jpg")`; baştaki `.`
