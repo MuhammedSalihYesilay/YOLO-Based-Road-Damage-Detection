@@ -84,6 +84,7 @@ Her kayıt: tarih — karar — gerekçe.
 ## 2026-10-27 — Adım 2 veri kararları
 - **Norveç:** uzun kenar 1280'e küçültülür (JPEG 95); baseline imgsz 640, seçilen modelde 1024. Gerekçe: kutuların
   %23,5'i 640'ta 8 px altına düşüyor (1024'te %9,9, 1280'de %5,8); 1024 tüm eğitimi ~2,5 kat yavaşlatır.
+  Görsel: [arastirma/norvec_cozunurluk_kucultme.html](arastirma/norvec_cozunurluk_kucultme.html)
 - **Boş görüntü:** yalnızca train'de ~%10'a indirilir (~2.400, ülke oranlı, seed 42); val/test doğal (%37,8). Gerekçe:
   14.522 boş görüntü var, Ultralytics %0–10 öneriyor; epoch ~%30 kısalır, precision gerçekçi ölçülür.
 - **Sınıf dengesizliği:** baseline'da işlem yok; sınıf başına AP ölçülünce Adım 6'da ağırlık/oversampling denenir.
