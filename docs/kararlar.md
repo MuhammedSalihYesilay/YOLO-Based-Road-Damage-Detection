@@ -120,3 +120,30 @@ Her kayıt: tarih — karar — gerekçe.
   `quantize=16` olarak validator'da kalıyor); fark araştırması burada kapatıldı. Tek, tekrar üretilebilir ölçüm yolu
   deneyleri birbiriyle adil karşılaştırır.
 - **FP16:** GTX 1650'de FP16 bozuk sonuç veriyor (val mAP50 **0,04**). FPS ölçümü ve arayüz **FP32** ile yapılır.
+
+## 2026-10-31 — Adım 6 deney sırası ve model seçim kuralı
+- **Karar:** Sıra: YOLO11s → YOLO26s → YOLO26n → model seçimi → seçilen modelle imgsz 1024 → D40 sınıf ağırlığı →
+  D40 oversampling → (koşullu) birleşik model; zaman kalırsa mosaic kapalı. **Seçim:** baseline dahil s modelleri
+  içinden val mAP50'si (yerel FP32) en yüksek olan; fark 1 puandan azsa GTX 1650 FPS'i yüksek olan. YOLO26n ayrıca kamera adayı.
+  Birleşik model yalnızca 1024 ve bir D40 yöntemi val'de ayrı ayrı kazandırırsa eğitilir.
+- **Gerekçe:** Önce mimari seçilir ki sonraki deneyler tek bir modelde, tek değişkenle yapılsın. Model karşılaştırması
+  ara rapora (23 Kas) yetişmesi gereken asıl iş. 1 puandan küçük farklar seed/oturum oynaklığı içinde kalabilir; o
+  durumda kamera hedefi için hız belirleyici.
+  Ayrıntı: [adim-6-karsilastirma.md](adimlar/adim-6-karsilastirma.md)
+
+## 2026-10-31 — D40 dengeleme: cls_pw 0.5 ve 2× oversampling
+- **Karar:** İki ayrı deney. (1) Ultralytics `cls_pw=0.5`: sınıf kaybı ters frekansın karekökü ile ağırlıklandırılır.
+  (2) D40 içeren train görüntüleri (2.991 / 21.211) train listesinde 2 kez yazılır (24.202 satır); görüntü kopyalanmaz,
+  val/test değişmez.
+- **Gerekçe:** D40 en zayıf sınıf (val AP50 0,464, recall 0,43). D00:D40 ≈ 4:1; tam ters frekans (`cls_pw=1`) D40'a
+  ~4 kat ağırlık verip D00'ı cezalandırabilir, 0,5 ~2 kat ile daha yumuşak. Ağırlık ve oversampling sorunu farklı
+  yollardan çözer (kayıp hesabı / veri sıklığı); ikisini ayrı denemek hangisinin işe yaradığını gösterir.
+
+## 2026-10-31 — Uzun eğitimler: süre sınırıyla düzgün durdurma (MAX_HOURS)
+- **Karar:** `train_experiment.ipynb`'de `on_fit_epoch_end` callback'i, bir sonraki epoch `MAX_HOURS`'u aşacaksa
+  eğitimi `last.pt` kaydedildikten sonra durdurur; yeni oturumda `MODE="devam"` ile sürdürülür. Varsayılan 11 sa;
+  1024 gibi uzun deneyler bilerek daha küçük değerle iki oturuma bölünür. Yeni model/imgsz önce `MODE="deneme"` ile
+  (train'in %10'u, 2 epoch, otomatik dur + devam) test edilir.
+- **Gerekçe:** Kaggle 12 saatte oturumu zorla keser. Ultralytics normal bitişte `last.pt`'den optimizer'ı silip devamı
+  kapatıyor; bizim durdurma bu adımdan önce olduğu için checkpoint devam ettirilebilir kalıyor (trainer.py'de kayıt →
+  callback sırası doğrulandı). Ultralytics'in kendi `time` ayarı eğitimi "bitmiş" sayıp devamı engellediği için kullanılmadı.

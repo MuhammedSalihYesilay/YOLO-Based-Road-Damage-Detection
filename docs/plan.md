@@ -170,10 +170,10 @@ Görüntü açmaz; sadece `ann/*.json` okunur, boyutlar JSON'daki `size` alanın
 - *Ne öğrendim:* IoU eşiği, TP/FP, precision/recall/F1, mAP50 ile mAP50-95 farkı, confusion matrix okuma, alt küme mAP'sinin ayrı hesaplanması, FPS ölçümünde ısınma ve GPU senkronizasyonu, aynı modelin farklı ortam/hassasiyette farklı sonuç verebilmesi.
 - *Hocaya:* "mAP50, tahmin kutusu gerçek kutuyla en az %50 örtüşünce doğru sayılan ortalama kesinlik. Modeli sınıf ve ülke bazında ölçtük; en zayıf yer Norveç ve çukur sınıfı. Japonya+Hindistan'da val'de 0,522 aldık; referansın 0,547'siyle kesin karşılaştırmayı test setinde yapacağız. GTX 1650'de 53 FPS, gerçek zamanlı hedefin üç katı."
 
-**Adım 6: Karşılaştırma deneyleri** (val üzerinde)
-- Modeller: YOLOv8s, YOLO11s, YOLO26s + kamera için YOLO26n; aynı ayarlarla 50 epoch + early stopping; seçilen modelde imgsz 640 ve 960/1024 deneyi (ayrıntı: docs/arastirma/yolo-modelleri.md)
-- Augmentation: varsayılan, mosaic kapalı (referans gibi), çukur odaklı ek artırma.
-- Sınıf dengesizliği: sınıf ağırlığı / oversampling denemesi.
+**Adım 6: Karşılaştırma deneyleri** (val üzerinde) ([ayrıntı](adimlar/adim-6-karsilastirma.md))
+- ✅ 2026-10-31: deney planı + tek parametreli notebook (`notebooks/train_experiment.ipynb`; ayar hücresi, `MODE` = deneme/egitim/devam, `MAX_HOURS` süre sınırıyla düzgün durdurma). Eğitimler Kaggle'da başlatılacak.
+- Sıra: (2) YOLO11s → (3) YOLO26s → (4) YOLO26n → **model seçimi** (val mAP50; fark < 1 puansa FPS) → seçilen modelle (5) imgsz 1024 → (6) D40 sınıf ağırlığı `cls_pw 0.5` → (7) D40 oversampling ×2 → (8) koşullu birleşik (1024 + iyi olan D40 yöntemi). Zaman kalırsa mosaic kapalı (referans gibi).
+- Ortak ayarlar baseline ile aynı (kararlar.md 2026-10-29); her deney tek değişken. Her deney sonrası yerelde `evaluate.py` + `measure_fps.py` → `docs/deneyler.md`.
 - *Ne öğreneceğim:* model boyutu ile hız ve doğruluk ilişkisi, augmentation türleri, dengesiz veriyle başa çıkma.
 - *Hocaya:* "Aynı veriyle, tek bir değişkeni değiştirerek karşılaştırdık; tablo ve grafik burada. En iyisini val'e göre seçtik, test'e en son bir kez baktık."
 
@@ -230,7 +230,7 @@ Not: vize/final haftaları ve kesin teslim tarihi bilinince çizelge güncellene
 - `docs/kararlar.md` oluşturuldu.
 
 ## 10. Açık konular (2026-10-18; çoğu Adım 1 analizini bekliyor)
-1. **Deney bütçesi:** Hafta 5'teki 4 model karşılaştırması (50 epoch) haftalık 30 saatlik Kaggle kotasına sığmıyor. Adım 4'te baseline'ın epoch süresi ölçülünce iki hesapla ve koşu planıyla yeniden hesaplanacak. *2026-10-29: ölçüldü — v8s/640/50 epoch ≈ 5 saat (T4); hesap Adım 6 öncesi yapılacak.*
+1. ~~**Deney bütçesi:** Hafta 5'teki 4 model karşılaştırması (50 epoch) haftalık 30 saatlik Kaggle kotasına sığmıyor. Adım 4'te baseline'ın epoch süresi ölçülünce iki hesapla ve koşu planıyla yeniden hesaplanacak.~~ ✅ 2026-10-31 kapandı: deney sırası ve oturumlara bölme yöntemi [adim-6-karsilastirma.md](adimlar/adim-6-karsilastirma.md)'de
 2. ~~**Ardışık kare (sekans) sızıntısı:** Adım 1'de dosya adlarında sekans/çekim bilgisi var mı bakılacak; varsa bölme sekans bazında yapılacak (aynı sekansın kareleri hem train hem test'e düşmemeli).~~ ✅ 2026-10-27 kapandı: sızıntı işareti yok, rastgele katmanlı bölme
 3. **Görev dağılımı:** Kişi A / Kişi B kim olacak, belli değil. Branch düzeni önerisi: herkes kendi dalında çalışır, `main`'e Pull Request ile birleştirir.
 4. ~~**`docs/deneyler.md` sütun şablonu** belirlenecek.~~ ✅ 2026-10-30 kapandı: Ayarlar + Sonuçlar (val) tabloları

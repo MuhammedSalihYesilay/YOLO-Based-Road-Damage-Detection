@@ -128,7 +128,7 @@ yol-hasari/
   data/yolo/       ← YOLO formatlı veri + data.yaml (prepare_yolo.py çıktısı, git dışı)
   src/kaggle/      ← Kaggle'a yüklenecek zip'i hazırlayan script (pack_dataset.py)
   data/kaggle_upload/ ← Kaggle'a yüklenecek zip (pack_dataset.py çıktısı, git dışı)
-  notebooks/       ← Kaggle eğitim notebook'ları (train_baseline.ipynb)
+  notebooks/       ← Kaggle eğitim notebook'ları (train_baseline.ipynb, train_experiment.ipynb: Adım 6 deneyleri)
 ```
 
 ## Çalışma kuralları (Claude için)
