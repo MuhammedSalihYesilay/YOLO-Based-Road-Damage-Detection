@@ -144,7 +144,7 @@ Komutlar proje klasöründen (`C:\dev\yol-hasari`), PowerShell'de:
 | Ad | mAP50 | Fark (baseline'a göre) | D40 | Norveç | Japonya+Hindistan | FPS GTX 1650 | Yorum |
 |---|---|---|---|---|---|---|---|
 | baseline_v8s | 0,571 | — | 0,464 | 0,295 | 0,522 | 53,2 | Karşılaştırma noktası |
-| e2_yolo11s | | | | | | | |
+| e2_yolo11s | 0,582 | +1,1 | 0,477 | 0,265 | 0,522 | 53,4 | Genelde biraz iyi, Norveç'te kötü (§6.1) |
 | e3_yolo26s | | | | | | | |
 | e4_yolo26n | | | | | | | |
 | e5 (1024) | | | | | | | |
@@ -152,6 +152,103 @@ Komutlar proje klasöründen (`C:\dev\yol-hasari`), PowerShell'de:
 | e7 (D40 ×2) | | | | | | | |
 
 **Seçilen model:** *(model seçiminden sonra)*
+
+### 6.1 e2 YOLO11s sonuçları (val seti, yerel ölçüm, FP32)
+Eğitim ayarları baseline ile birebir aynı (`args.yaml` kontrol edildi); tek fark model: YOLOv8s yerine YOLO11s.
+50 epoch'un hepsi tamamlandı, erken durma devreye girmedi; son epoch'larda val mAP50 yatay (0,595–0,597).
+Ölçüm baseline ile aynı yoldan: `evaluate.py` (val, imgsz 640, batch 16) ve `measure_fps.py`.
+Ayrıntılı tablolar: [e2_yolo11s_val/summary.md](../degerlendirme/e2_yolo11s_val/summary.md).
+
+**Genel**
+| Model | P | R | F1 | **mAP50** | mAP50-95 |
+|---|---|---|---|---|---|
+| baseline (YOLOv8s) | 0,621 | 0,541 | 0,578 | 0,571 | 0,286 |
+| e2 (YOLO11s) | 0,638 | 0,542 | 0,586 | **0,582** | 0,294 |
+| Fark | +1,7 | +0,1 | +0,8 | **+1,1** | +0,8 |
+
+*Yorum:* YOLO11s genel mAP50'de baseline'dan 1,1 puan önde. Artış neredeyse tamamen **precision**'dan geliyor
+(+1,7); recall değişmedi (0,541 → 0,542). Yani YOLO11s gerçek hasarlardan **daha fazlasını bulmuyor**, ama "hasar"
+dediği yerlerde daha az yanılıyor (daha az yanlış alarm). mAP50-95'teki artış (+0,8) kutuların biraz daha iyi
+oturduğunu gösteriyor.
+
+**Sınıf bazında (AP50)**
+| Sınıf | baseline | e2 | Fark |
+|---|---|---|---|
+| D00 boyuna çatlak | 0,569 | 0,572 | +0,3 |
+| D10 enine çatlak | 0,574 | 0,591 | +1,7 |
+| D20 timsah çatlağı | 0,679 | 0,690 | +1,1 |
+| D40 çukur | 0,464 | 0,477 | +1,3 |
+
+*Yorum:* Dört sınıfın hepsi az da olsa iyileşti; en çok enine çatlak (+1,7). Sıralama değişmedi: en iyi yine D20,
+en zayıf yine **D40 (0,477)**. Mimari değişikliği çukur sorununu çözmüyor; D40 deneyleri (6 ve 7) hâlâ gerekli.
+D40'ın recall'u 0,425: çukurların yarıdan fazlası hâlâ kaçıyor.
+
+**Ülke bazında (mAP50)**
+| Ülke | Kutu | baseline | e2 | Fark |
+|---|---|---|---|---|
+| China_MotorBike | 439 | 0,882 | 0,906 | +2,4 |
+| ABD | 1.083 | 0,607 | 0,640 | +3,3 |
+| China_Drone | 308 | 0,593 | 0,666 | **+7,3** |
+| Japonya | 1.582 | 0,558 | 0,565 | +0,7 |
+| Çek Cumhuriyeti | 157 | 0,445 | 0,472 | +2,7 |
+| Hindistan | 698 | 0,405 | 0,413 | +0,8 |
+| Norveç | 960 | 0,295 | 0,265 | **−3,0** |
+
+*Yorum:*
+- **Norveç'te tek düşüş (−3,0).** Recall 0,304'ten 0,266'ya indi; düşüş en çok çukurda (0,127 → 0,076) ve timsah
+  çatlağında (0,348 → 0,256). Norveç'in sorunu küçük nesneler (640'ta kutuların ~%23'ü 8 pikselin altında). Daha
+  yeni bir mimari bu sorunu çözmedi, hatta biraz kötüleşti. Bu, sorunun modelde değil **görüntü çözünürlüğünde**
+  olduğunu destekliyor: imgsz 1024 deneyi (5) bu yüzden önemli.
+- **China_Drone'da büyük artış (+7,3).** Dikkat: yalnızca 308 kutu var; küçük alt kümelerde birkaç doğru/yanlış
+  tahmin sonucu birkaç puan oynatabilir. Yönü olumlu, büyüklüğüne fazla güvenilmemeli. Aynı uyarı Çek (157 kutu) için de geçerli.
+- **ABD (+3,3)** büyük bir alt küme (1.083 kutu) olduğu için bu artış daha güvenilir.
+
+**Özel alt kümeler**
+| Alt küme | baseline | e2 | Fark |
+|---|---|---|---|
+| Drone hariç | 0,568 | 0,577 | +0,9 |
+| Japonya+Hindistan | 0,522 | 0,522 | 0,0 |
+
+*Yorum:* Japonya+Hindistan'da hiç değişiklik yok; referansın 0,547'sinin hâlâ 2,5 puan altında (val'de ön
+karşılaştırma). Japonya'daki küçük artış (+0,7) ile Hindistan'daki (+0,8) birleşik alt kümede birbirini dengeleyen sınıf
+farklarıyla sıfırlanıyor (ör. D00 0,465 → 0,446). Yani YOLO11s'in kazancı daha çok ABD ve Çin görüntülerinden geliyor.
+
+**Hız (FPS, FP32, batch 1)**
+| Cihaz | baseline | e2 | Fark |
+|---|---|---|---|
+| GTX 1650 | 53,2 | 53,4 | ≈ aynı |
+| CPU | 9,5 | 10,6 | +%11 |
+
+*Yorum:* YOLO11s kâğıt üzerinde daha hafif (9,4 M parametre / 21,6 GFLOPs; YOLOv8s 11,2 M / 28,6). CPU'da bu %11
+hız olarak görünüyor. GTX 1650'de fark yok. Olası neden: tek görüntülük (batch 1) çıkarımda GPU tam dolmuyor ve
+süreyi işlem sayısından çok katman sayısı ve bellek erişimi belirliyor; YOLO11'in ek dikkat (attention) bloğu da
+FLOPs kazancını dengeliyor olabilir (ayrıca ölçmedik).
+Her iki model de 15 FPS hedefinin 3,5 katında.
+
+**Baseline'la fark ve olası nedeni**
+YOLO11s, YOLOv8s'e göre iki mimari değişiklik getiriyor: daha verimli **C3k2** blokları (daha az parametreyle benzer
+kapasite) ve **C2PSA** adlı bir dikkat bloğu (görüntünün önemli bölgelerine odaklanmayı sağlar). Bizim ölçümde bunun
+etkisi "daha az yanlış alarm" olarak görünüyor (precision +1,7), "daha çok hasar bulma" olarak değil (recall aynı).
+Literatürdeki beklentiyle uyumlu: yol hasarında yeni sürümlerin kazancı ~1 puan ([yolo-modelleri.md](../arastirma/yolo-modelleri.md)).
+
+**Bu fark anlamlı mı?** +1,1 puan, model seçim kuralındaki 1 puan sınırının hemen üstünde. Ancak her model **tek bir
+seed** ile eğitildi; aynı modeli farklı seed'le eğitince de sonuç ~1 puan oynayabilir (bunu ölçmedik, kota yok).
+Bu yüzden "YOLO11s kesin daha iyi" demek yerine "YOLO11s biraz önde, fark küçük" demek doğru. Seçim, YOLO26s (e3)
+ölçülünce yapılacak.
+
+**Sayıların anlamı (kısaca)**
+- mAP50 0,582: model, hasarı bulup kutuyu en az %50 örtüşecek şekilde çizdiğinde "doğru" sayılıyor; tüm güven
+  eşiklerindeki ortalama kesinliğin 4 sınıf ortalaması 0,58.
+- P 0,64: modelin "hasar" dediklerinin yaklaşık üçte ikisi gerçekten hasar. R 0,54: gerçek hasarların yarıdan biraz
+  fazlası bulunuyor.
+- "+1,1 puan": 0,571'den 0,582'ye, yani 0,011'lik mutlak artış (yaklaşık %2 göreli).
+
+**Hocaya nasıl anlatırım (e2)**
+"Baseline ile aynı veri, aynı ayarlar ve aynı seed ile yalnızca modeli değiştirdik: YOLOv8s yerine bir sonraki nesil
+YOLO11s. Genel mAP50 0,571'den 0,582'ye çıktı. Artış precision'dan geliyor, yani model daha az yanlış alarm veriyor ama
+daha fazla hasar bulmuyor. Dört sınıfın hepsi az da olsa iyileşti, ama çukur hâlâ en zayıf sınıf. Tek kötüleşme
+Norveç'te: orada sorun küçük nesneler, model değiştirmek bunu çözmüyor; bunu görüntü boyutunu büyüterek deneyeceğiz.
+Hız GTX 1650'de aynı, saniyede 53 kare. Fark küçük ve tek seed'le ölçüldü; bu yüzden YOLO26s'i de ölçüp öyle seçeceğiz."
 
 ---
 
