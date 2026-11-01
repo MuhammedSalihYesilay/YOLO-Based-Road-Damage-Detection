@@ -24,6 +24,13 @@ Kaynaklar: [YOLOv8](https://docs.ultralytics.com/models/yolov8/), [YOLO11](https
 
 Makalenin kendi deneyinde STAL'ın küçük nesnelerdeki kazancı küçük: AP_S 29,0'dan 29,6'ya çıkıyor.
 
+**Not (2026-11-01, Adım 6 e3 ölçümünden):** Bizim kurulumda (Ultralytics 8.4.182) iki yenilik YOLO26'yı diğerlerinden ayırmıyor:
+- **NMS'siz çıkarım isteğe bağlı:** varsayılan `nms=None` NMS'li çalışır; NMS'siz baş yalnızca `nms=False` ile açılır.
+  Eğitim ve ölçümlerimiz varsayılanla (NMS'li) yapıldı; son işleme süresi diğer modellerle aynı (1,4 ms).
+- **MuSGD:** `optimizer=auto` uzun eğitimde (>10.000 adım) her modelde MuSGD seçiyor; baseline, e2 ve e3'ün üçü de
+  MuSGD ile eğitildi (checkpoint'lerden doğrulandı).
+Ayrıntı: [adim-6-karsilastirma.md §6.2](../adimlar/adim-6-karsilastirma.md).
+
 ## Yol hasarında kanıtlar
 - **RDD2022, topluluk sonuçları** (hakemli değil, zayıf kanıt). Ayarlar: 4 sınıf, 70/15/15 bölme, 640 px, 50 epoch.
   - mAP50: **YOLOv8s 61,45**, **YOLO26s 61,27**, YOLO26m 61,24, YOLOv8m 62,03, YOLOv8n 58,8.

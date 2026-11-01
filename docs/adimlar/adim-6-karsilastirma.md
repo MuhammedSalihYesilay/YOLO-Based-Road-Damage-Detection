@@ -145,7 +145,7 @@ Komutlar proje klasöründen (`C:\dev\yol-hasari`), PowerShell'de:
 |---|---|---|---|---|---|---|---|
 | baseline_v8s | 0,571 | — | 0,464 | 0,295 | 0,522 | 53,2 | Karşılaştırma noktası |
 | e2_yolo11s | 0,582 | +1,1 | 0,477 | 0,265 | 0,522 | 53,4 | Genelde biraz iyi, Norveç'te kötü (§6.1) |
-| e3_yolo26s | | | | | | | |
+| e3_yolo26s | 0,589 | +1,8 | 0,500 | 0,280 | 0,537 | 50,5 | En yüksek mAP50 ve D40; e2'den farkı 1 puanın altında (§6.2) |
 | e4_yolo26n | | | | | | | |
 | e5 (1024) | | | | | | | |
 | e6 (cls_pw) | | | | | | | |
@@ -249,6 +249,118 @@ YOLO11s. Genel mAP50 0,571'den 0,582'ye çıktı. Artış precision'dan geliyor,
 daha fazla hasar bulmuyor. Dört sınıfın hepsi az da olsa iyileşti, ama çukur hâlâ en zayıf sınıf. Tek kötüleşme
 Norveç'te: orada sorun küçük nesneler, model değiştirmek bunu çözmüyor; bunu görüntü boyutunu büyüterek deneyeceğiz.
 Hız GTX 1650'de aynı, saniyede 53 kare. Fark küçük ve tek seed'le ölçüldü; bu yüzden YOLO26s'i de ölçüp öyle seçeceğiz."
+
+### 6.2 e3 YOLO26s sonuçları (val seti, yerel ölçüm, FP32)
+Eğitim ayarları baseline ve e2 ile birebir aynı (`args.yaml` kontrol edildi); tek fark model: YOLO26s.
+50 epoch'un hepsi tamamlandı; en iyi val mAP50 epoch 43'te, son epoch'larda yatay (0,598–0,599).
+Ölçüm aynı yoldan: `evaluate.py` (val, imgsz 640, batch 16) ve `measure_fps.py`.
+Ayrıntılı tablolar: [e3_yolo26s_val/summary.md](../degerlendirme/e3_yolo26s_val/summary.md).
+Farklar puan cinsinden (0,01 = 1 puan), tablolardaki yuvarlanmış değerlerden hesaplandı.
+
+**Genel**
+| Model | P | R | F1 | **mAP50** | mAP50-95 |
+|---|---|---|---|---|---|
+| baseline (YOLOv8s) | 0,621 | 0,541 | 0,578 | 0,571 | 0,286 |
+| e2 (YOLO11s) | 0,638 | 0,542 | 0,586 | 0,582 | 0,294 |
+| e3 (YOLO26s) | 0,641 | 0,547 | 0,591 | **0,589** | 0,294 |
+| e3 − baseline | +2,0 | +0,6 | +1,3 | **+1,8** | +0,8 |
+| e3 − e2 | +0,3 | +0,5 | +0,5 | **+0,7** | 0,0 |
+
+*Yorum:* YOLO26s üç model içinde en yüksek mAP50'ye sahip: baseline'dan 1,8 puan, e2'den 0,7 puan önde. e2'deki gibi
+artışın çoğu precision'dan (daha az yanlış alarm) geliyor; e3'te recall da biraz artmış (+0,6). Kutuların ne kadar iyi
+oturduğunu gösteren mAP50-95 e2 ile aynı (0,294).
+
+**Sınıf bazında (AP50)**
+| Sınıf | baseline | e2 | e3 | e3 − baseline | e3 − e2 |
+|---|---|---|---|---|---|
+| D00 boyuna çatlak | 0,569 | 0,572 | 0,578 | +0,9 | +0,6 |
+| D10 enine çatlak | 0,574 | 0,591 | 0,588 | +1,4 | −0,3 |
+| D20 timsah çatlağı | 0,679 | 0,690 | 0,691 | +1,2 | +0,1 |
+| D40 çukur | 0,464 | 0,477 | **0,500** | **+3,6** | **+2,3** |
+
+*Yorum:* e3'ün e2'ye üstünlüğü neredeyse tamamen **çukurdan (D40)** geliyor: 0,477 → 0,500. Diğer üç sınıfta e2 ile
+e3 arasındaki fark 1 puanın altında. D40 hâlâ en zayıf sınıf ve recall'u 0,430: çukurların yarıdan fazlası hâlâ
+kaçıyor. D40 deneyleri (6 ve 7) gerekli olmaya devam ediyor.
+
+**Ülke bazında (mAP50)**
+| Ülke | Kutu | baseline | e2 | e3 | e3 − baseline | e3 − e2 |
+|---|---|---|---|---|---|---|
+| China_MotorBike | 439 | 0,882 | 0,906 | 0,924 | +4,2 | +1,8 |
+| ABD | 1.083 | 0,607 | 0,640 | 0,616 | +0,9 | −2,4 |
+| China_Drone | 308 | 0,593 | 0,666 | 0,666 | +7,3 | 0,0 |
+| Japonya | 1.582 | 0,558 | 0,565 | 0,574 | +1,6 | +0,9 |
+| Çek Cumhuriyeti | 157 | 0,445 | 0,472 | 0,426 | −1,9 | −4,6 |
+| Hindistan | 698 | 0,405 | 0,413 | 0,433 | +2,8 | +2,0 |
+| Norveç | 960 | 0,295 | 0,265 | 0,280 | −1,5 | +1,5 |
+
+*Yorum:*
+- **Japonya ve Hindistan'da e3 en iyisi.** Hindistan'da artış belirgin (+2,8 / +2,0).
+- **ABD'de e3, e2'nin gerisinde (−2,4).** ABD'de e3'ün P'si 0,548'e düşüp R'si 0,628'e çıkıyor (e2: 0,692 / 0,597).
+  P ve R tek bir güven eşiğinde ölçülüyor ve bu eşik modelden modele değişiyor; mAP ise eşikten bağımsız. Bu yüzden
+  karşılaştırmada mAP'ye bakmak gerekiyor; o da 2,4 puan geride.
+- **Norveç hâlâ baseline'ın altında (−1,5).** YOLO26'nın küçük nesneler için getirdiği yenilik (STAL, aşağıda) Norveç'te
+  baseline'ı geçmeye yetmedi. Bu, e2'deki gibi, sorunun mimaride değil **görüntü çözünürlüğünde** olduğunu destekliyor
+  (imgsz 1024 deneyi, 5).
+- **Çek (157 kutu) ve China_Drone (308 kutu) küçük alt kümeler.** Çek'teki −4,6 ve Drone'daki +7,3 birkaç tahminle
+  oynayabilecek büyüklükte; yön göstergesi olarak okunmalı, kesin sonuç olarak değil.
+
+**Özel alt kümeler**
+| Alt küme | baseline | e2 | e3 | e3 − baseline | e3 − e2 |
+|---|---|---|---|---|---|
+| Drone hariç | 0,568 | 0,577 | 0,584 | +1,6 | +0,7 |
+| Japonya+Hindistan | 0,522 | 0,522 | **0,537** | **+1,5** | **+1,5** |
+
+*Yorum:* Japonya+Hindistan'da ilk kez anlamlı bir artış var: 0,522 → 0,537. Referansın 0,547'sine fark 2,5 puandan
+**1,0 puana** indi (val'de ön karşılaştırma; kesin karşılaştırma Adım 9'da test setinde). Drone hariç sonuç genel
+sonuçla aynı yönde: Drone görüntüleri sonucu şişirmiyor.
+
+**Hız (FPS, FP32, batch 1)**
+| Cihaz | baseline | e2 | e3 |
+|---|---|---|---|
+| GTX 1650 FPS | 53,2 | 53,4 | **50,5** |
+| GTX 1650 çıkarım ms | 15,3 | 15,5 | 16,3 |
+| GTX 1650 son işleme ms | 1,4 | 1,3 | 1,4 |
+| CPU FPS | 9,5 | 10,6 | 9,9 |
+
+*Yorum:* e3 GTX 1650'de üç modelin en yavaşı: e2'den ~%5 yavaş (50,5 / 53,4 FPS). Fark sinir ağı hesabından
+(çıkarım 16,3 ms) geliyor. Son işleme süresi değişmedi (1,4 ms), çünkü ölçümümüzde NMS hâlâ çalışıyor (aşağıya bakın).
+15 FPS hedefinin yine 3 katından fazla; kamera için sorun değil.
+
+**YOLO26'nın mimari farkları (kısaca) ve bizim ölçümde ne gördük**
+| Yenilik | Ne demek | Bizim deneyde |
+|---|---|---|
+| **NMS'siz uçtan uca başlık** | Normalde model aynı nesneye birçok kutu önerir, NMS (non-maximum suppression) adlı son adım üst üste binenleri ayıklar. YOLO26'nın ek bir "bire-bir" başlığı her nesne için tek kutu üretmeyi öğrenir, NMS'e gerek kalmaz | Ultralytics 8.4.182'de bu mod **isteğe bağlı** (`nms=False`), varsayılan değil. Hem Kaggle'daki eğitim içi doğrulama hem bizim ölçümümüz varsayılanla, yani **NMS'li** yapıldı. e3'ün sonuçları YOLO26'nın "bire-çok" başlığı + NMS ile alındı. Son işleme süresinin aynı kalması bunu doğruluyor |
+| **DFL'nin kaldırılması** | YOLOv8/11 kutu kenarının yerini bir olasılık dağılımı olarak tahmin eder (DFL, 16 aralık). YOLO26 kenar uzaklığını doğrudan tahmin eder; model sadeleşir, başka formatlara aktarmak kolaylaşır | Checkpoint'te doğrulandı (`reg_max` 16 → 1). mAP50-95 (kutu oturması) e2 ile aynı: kayıp da kazanç da yok |
+| **STAL** | Küçük nesnelere eğitim sırasında daha fazla "aday kutu" atayan etiket atama yöntemi | Norveç (küçük nesne) e2'den iyi ama baseline'dan kötü. Belirgin bir küçük nesne kazancı görmedik. YOLO26 makalesinde de kazanç küçük (AP_S 29,0 → 29,6) |
+| **ProgLoss** | Eğitim boyunca kayıp bileşenlerinin ağırlığını kademeli değiştiren yöntem | Ayrıca ölçülemedi; sonuca toplam katkısı içinde |
+| **MuSGD optimizer** | YOLO26 ile tanıtılan optimizer | **Bizim deneylerde fark değil:** `optimizer=auto` uzun eğitimlerde her modelde MuSGD seçiyor. Checkpoint'lerden doğrulandı: baseline, e2 ve e3'ün üçü de MuSGD ile eğitildi |
+
+Kaynak: [yolo-modelleri.md](../arastirma/yolo-modelleri.md); başlık, `reg_max` ve optimizer bilgisi bizim `best.pt`
+dosyalarından okundu.
+
+**Bu fark anlamlı mı? (1 puan kuralı, kararlar.md 2026-10-31)**
+- **e3 − baseline = +1,8 puan:** 1 puan sınırının açıkça üstünde. YOLO26s, YOLOv8s'ten daha iyi.
+- **e3 − e2 = +0,7 puan:** 1 puan sınırının **altında**. Genel mAP50'de e2 ile e3'ü birbirinden ayıramıyoruz; kurala
+  göre bu durumda GTX 1650 FPS'ine bakılacak. Bunun yanında e3, en zayıf sınıf olan D40'ta (+2,3) ve hedef alt küme
+  Japonya+Hindistan'da (+1,5) 1 puanın üstünde önde.
+- Her model **tek seed** ile eğitildi; seed değişince sonucun ne kadar oynadığını ölçmedik. Küçük farklar bu oynaklığın
+  içinde kalabilir.
+- **Model seçimi henüz yapılmadı:** e4 (YOLO26n) ölçülünce üç model birlikte değerlendirilecek.
+
+**Sayıların anlamı (kısaca)**
+- mAP50 0,589: tüm güven eşiklerindeki ortalama kesinliğin 4 sınıf ortalaması; kutu en az %50 örtüşürse doğru sayılıyor.
+- D40 0,500: çukurda bu ortalama kesinlik yarı yarıya. Hâlâ en zayıf sınıf, ama baseline'dan 3,6 puan yukarıda.
+- 50,5 FPS: GTX 1650 saniyede ~50 görüntü işliyor, yani bir görüntü ~20 ms.
+
+**Hocaya nasıl anlatırım (e3)**
+"Üçüncü deneyde yine yalnızca modeli değiştirdik: en yeni sürüm YOLO26s. Genel mAP50 0,589 ile üç modelin en iyisi:
+baseline'dan 1,8 puan, YOLO11s'ten 0,7 puan yukarıda. YOLO11s ile farkı bizim 1 puanlık sınırımızın altında, yani
+genel sonuçta ikisini ayıramıyoruz. Ama en zayıf sınıfımız çukurda 2,3 puan, referansla karşılaştırdığımız
+Japonya+Hindistan'da 1,5 puan önde; referansa olan farkımız 2,5 puandan 1 puana indi. YOLO26'nın tanıtılan
+yeniliklerinden NMS'siz çıkarım, kullandığımız sürümde varsayılan olarak kapalı. Bu yüzden ölçümümüz NMS'li ve hız
+avantajı görünmüyor: GTX 1650'de 50 FPS, YOLO11s'ten biraz yavaş ama hedefin üç katı. Optimizer'ın bütün modellerde
+aynı (MuSGD) olduğunu checkpoint'lerden doğruladık, yani fark optimizer'dan değil mimariden geliyor. Seçimi en küçük model YOLO26n
+ölçülünce yapacağız."
 
 ---
 
