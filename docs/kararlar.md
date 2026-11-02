@@ -148,3 +148,17 @@ Her kayıt: tarih — karar — gerekçe.
 - **Gerekçe:** Kaggle 12 saatte oturumu zorla keser. Ultralytics normal bitişte `last.pt`'den optimizer'ı silip devamı
   kapatıyor; bizim durdurma bu adımdan önce olduğu için checkpoint devam ettirilebilir kalıyor (trainer.py'de kayıt →
   callback sırası doğrulandı). Ultralytics'in kendi `time` ayarı eğitimi "bitmiş" sayıp devamı engellediği için kullanılmadı.
+
+## 2026-11-02 — Seçilen model: YOLO26s (seçim kuralından bilinçli sapma)
+- **Karar:** 1024 ve D40 deneyleri (e5, e6, e7) **YOLO26s** (e3) ile yapılır ve e3'e karşı karşılaştırılır.
+  YOLO26n (e4) yedek kamera modeli olarak kalır; üzerinde 1024 / D40 deneyi yapılmaz. Baseline (YOLOv8s) raporda
+  referansla aynı mimarideki karşılaştırma noktası olarak kalır.
+- **Kuraldan sapma:** 2026-10-31 kuralı harfiyen uygulanınca **YOLO11s (e2)** çıkıyordu: en yüksek val mAP50 e3'te
+  (0,589), e2 ile farkı 0,7 puan (< 1) → kural GTX 1650 FPS'i yüksek olanı seçer (e2 53,4 / e3 50,5).
+- **Gerekçe:** Kuralın FPS'e bakmasının amacı kamera hedefiydi; iki model de 15 FPS hedefinin üç katından hızlı, aradaki
+  fark pratikte önemsiz. Sonraki deneylerin hedeflediği üç noktada e3 önde: D40 AP50 0,500 / 0,477 (+2,3),
+  Japonya+Hindistan 0,537 / 0,522 (+1,5; referansın 0,547'sine fark 1,0 puana iniyor), Norveç 0,280 / 0,265 (+1,5).
+  Bilinen maliyet ve sınırlar: e3'ün eğitimi ~%16 daha uzun (8 sa 22 dk / 7 sa 11 dk); farklar tek seed ile ölçüldü;
+  D40 ve Japonya+Hindistan genel val'den küçük alt kümeler. YOLO26n CPU'da 15 FPS'i geçen tek model (23,4 FPS),
+  doğrulukta s modellerinin ~3 puan altında (0,560).
+- Ayrıntı: [model-secimi.md](model-secimi.md), [adim-6-karsilastirma.md §6.4](adimlar/adim-6-karsilastirma.md)

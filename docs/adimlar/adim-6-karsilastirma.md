@@ -146,12 +146,13 @@ Komutlar proje klasöründen (`C:\dev\yol-hasari`), PowerShell'de:
 | baseline_v8s | 0,571 | — | 0,464 | 0,295 | 0,522 | 53,2 | Karşılaştırma noktası |
 | e2_yolo11s | 0,582 | +1,1 | 0,477 | 0,265 | 0,522 | 53,4 | Genelde biraz iyi, Norveç'te kötü (§6.1) |
 | e3_yolo26s | 0,589 | +1,8 | 0,500 | 0,280 | 0,537 | 50,5 | En yüksek mAP50 ve D40; e2'den farkı 1 puanın altında (§6.2) |
-| e4_yolo26n | | | | | | | |
+| e4_yolo26n | 0,560 | −1,1 | 0,458 | 0,239 | 0,509 | 61,2 | s'den ~3 puan düşük, CPU'da 23 FPS (§6.3) |
 | e5 (1024) | | | | | | | |
 | e6 (cls_pw) | | | | | | | |
 | e7 (D40 ×2) | | | | | | | |
 
-**Seçilen model:** *(model seçiminden sonra)*
+**Seçilen model:** **YOLO26s (e3)** (2026-11-02; gerekçe §6.4 ve [model-secimi.md](../model-secimi.md)).
+YOLO26n yedek kamera modeli.
 
 ### 6.1 e2 YOLO11s sonuçları (val seti, yerel ölçüm, FP32)
 Eğitim ayarları baseline ile birebir aynı (`args.yaml` kontrol edildi); tek fark model: YOLOv8s yerine YOLO11s.
@@ -361,6 +362,142 @@ yeniliklerinden NMS'siz çıkarım, kullandığımız sürümde varsayılan olar
 avantajı görünmüyor: GTX 1650'de 50 FPS, YOLO11s'ten biraz yavaş ama hedefin üç katı. Optimizer'ın bütün modellerde
 aynı (MuSGD) olduğunu checkpoint'lerden doğruladık, yani fark optimizer'dan değil mimariden geliyor. Seçimi en küçük model YOLO26n
 ölçülünce yapacağız."
+
+### 6.3 e4 YOLO26n sonuçları (val seti, yerel ölçüm, FP32)
+Eğitim ayarları diğer üç modelle birebir aynı (`args.yaml` kontrol edildi; optimizer yine MuSGD); tek fark model:
+YOLO26'nın en küçük boyu **n** (nano). 50 epoch'un hepsi tamamlandı; en iyi val mAP50 epoch 45'te, son epoch'larda
+yatay (0,576). Ölçüm aynı yoldan. Ayrıntılı tablolar: [e4_yolo26n_val/summary.md](../degerlendirme/e4_yolo26n_val/summary.md).
+
+Bu deneyin sorusu farklı: "en iyi model hangisi" değil, **"aynı nesilde s yerine n kullanınca ne kadar doğruluk
+kaybedip ne kadar hız kazanıyoruz?"** Bu yüzden asıl karşılaştırma e4 ↔ e3 (ikisi de YOLO26). n modeli s'nin ~¼'ü
+büyüklüğünde: 2,4 M parametre / 5,5 GFLOPs (s: 9,5 M / 20,9).
+
+**Genel**
+| Model | P | R | F1 | **mAP50** | mAP50-95 |
+|---|---|---|---|---|---|
+| baseline (YOLOv8s) | 0,621 | 0,541 | 0,578 | 0,571 | 0,286 |
+| e2 (YOLO11s) | 0,638 | 0,542 | 0,586 | 0,582 | 0,294 |
+| e3 (YOLO26s) | 0,641 | 0,547 | 0,591 | 0,589 | 0,294 |
+| e4 (YOLO26n) | 0,610 | 0,534 | 0,570 | **0,560** | 0,281 |
+| e4 − e3 | −3,1 | −1,3 | −2,1 | **−2,9** | −1,3 |
+
+*Yorum:* Modeli 4 kat küçültmek mAP50'de **2,9 puan** kaybettiriyor (0,589 → 0,560). Bu kayıp, s modelleri arasındaki
+farklardan (en fazla 1,8 puan) daha büyük: model **boyu**, model **sürümünden** daha çok etkiliyor. e4 baseline'ın da
+1,1 puan altında. Kayıp çoğunlukla precision'da (−3,1): küçük model daha çok yanlış alarm veriyor.
+
+**Sınıf bazında (AP50)**
+| Sınıf | baseline | e2 | e3 | e4 | e4 − e3 |
+|---|---|---|---|---|---|
+| D00 boyuna çatlak | 0,569 | 0,572 | 0,578 | 0,543 | −3,5 |
+| D10 enine çatlak | 0,574 | 0,591 | 0,588 | 0,569 | −1,9 |
+| D20 timsah çatlağı | 0,679 | 0,690 | 0,691 | 0,670 | −2,1 |
+| D40 çukur | 0,464 | 0,477 | 0,500 | 0,458 | **−4,2** |
+
+*Yorum:* En çok kaybeden sınıf **D40 (−4,2)**: e3'ün çukurdaki kazancı n boyunda tamamen kayboluyor, e4 çukurda
+baseline'ın bile altında (0,458). Az örnekli ve çeşitli görünümlü (çukur, tümsek, tekerlek izi) bir sınıfı öğrenmek
+daha fazla kapasite istiyor. D00'daki kayıp da büyük (−3,5): ince, uzun çatlaklar küçük modelde daha zor.
+
+**Ülke bazında (mAP50)**
+| Ülke | Kutu | baseline | e2 | e3 | e4 | e4 − e3 |
+|---|---|---|---|---|---|---|
+| China_MotorBike | 439 | 0,882 | 0,906 | 0,924 | 0,891 | −3,3 |
+| ABD | 1.083 | 0,607 | 0,640 | 0,616 | 0,574 | −4,2 |
+| China_Drone | 308 | 0,593 | 0,666 | 0,666 | 0,658 | −0,8 |
+| Japonya | 1.582 | 0,558 | 0,565 | 0,574 | 0,551 | −2,3 |
+| Çek Cumhuriyeti | 157 | 0,445 | 0,472 | 0,426 | 0,426 | 0,0 |
+| Hindistan | 698 | 0,405 | 0,413 | 0,433 | 0,389 | −4,4 |
+| Norveç | 960 | 0,295 | 0,265 | 0,280 | **0,239** | −4,1 |
+
+*Yorum:* Neredeyse her ülkede kayıp var. En büyük kayıplar **Hindistan (−4,4), ABD (−4,2) ve Norveç (−4,1)**. Norveç
+0,239 ile tüm modellerin en düşük değeri: küçük nesne sorunu küçük modelde daha da ağırlaşıyor. China_Drone (−0,8) ve
+Çek (0,0) neredeyse aynı kaldı; ikisi de küçük alt küme olduğu için bu "kayıp yok" sonucu da dikkatli okunmalı.
+
+**Özel alt kümeler**
+| Alt küme | baseline | e2 | e3 | e4 | e4 − e3 |
+|---|---|---|---|---|---|
+| Drone hariç | 0,568 | 0,577 | 0,584 | 0,554 | −3,0 |
+| Japonya+Hindistan | 0,522 | 0,522 | 0,537 | 0,509 | −2,8 |
+
+*Yorum:* Japonya+Hindistan'da e4 0,509; referansın 0,547'sinin 3,8 puan altında. n modeli, referansla karşılaştırma
+hedefi için uygun değil.
+
+**Hız (FPS, FP32, batch 1)**
+| Cihaz | baseline | e2 | e3 | e4 | e4 / e3 |
+|---|---|---|---|---|---|
+| GTX 1650 FPS | 53,2 | 53,4 | 50,5 | **61,2** | ×1,2 |
+| GTX 1650 çıkarım ms | 15,3 | 15,5 | 16,3 | 13,1 | |
+| CPU FPS | 9,5 | 10,6 | 9,9 | **23,4** | ×2,4 |
+| CPU çıkarım ms | 100,0 | 90,5 | 97,2 | 39,0 | |
+
+*Yorum:*
+- **GPU'da kazanç küçük (×1,2).** İşlem sayısı ¼'e indiği halde süre yalnızca %20 kısalıyor. Tek görüntülük (batch 1)
+  çıkarımda GTX 1650 tam dolmuyor; süreyi işlem sayısından çok katman sayısı ve ön/son işleme belirliyor (§6.1'deki
+  gözlemle aynı). GTX 1650'de s modelleri zaten hedefin 3 katı hızlı olduğu için n'ye geçmenin burada pratik bir faydası yok.
+- **CPU'da kazanç büyük (×2,4) ve önemli:** CPU'da süre işlem sayısıyla orantılı. e4 CPU'da **23,4 FPS** ile 15 FPS
+  hedefini geçen **tek model**; s modelleri CPU'da 10 FPS civarında kalıyor. Yani GPU'su olmayan bir bilgisayarda
+  (ör. sunum bilgisayarı) gerçek zamanlı kamera yalnızca n modeliyle mümkün.
+
+**Doğruluk / hız dengesi (özet):** e3 → e4: mAP50 −2,9 puan, D40 −4,2 puan; karşılığında GPU'da +%21, CPU'da +%136 hız.
+GPU'lu bilgisayarda bu takas değmez; GPU'suz bilgisayarda kamerayı mümkün kılan tek seçenek.
+
+**Hocaya nasıl anlatırım (e4)**
+"Dördüncü deneyde aynı nesil YOLO26'nın en küçük boyunu eğittik: s modelinin yaklaşık dörtte biri büyüklüğünde. Doğruluk
+2,9 puan düştü (0,589'dan 0,560'a); en çok kaybeden çukur sınıfı ve küçük nesnelerin olduğu Norveç oldu. Bu kayıp,
+farklı sürümler arasındaki farklardan büyük: modelin boyu, sürümünden daha önemli çıktı. Hızda ilginç bir sonuç gördük:
+GPU'da sadece %20 hızlandı, çünkü tek görüntüde GPU zaten tam dolmuyor; ama CPU'da 2,4 kat hızlandı ve saniyede 23
+görüntüyle GPU'suz da gerçek zamanlı hedefimizi geçen tek model oldu. Bu yüzden onu GPU'suz bilgisayarlar için yedek
+kamera modeli olarak tutuyoruz."
+
+### 6.4 Model seçimi
+> **Karar (2026-11-02): YOLO26s (e3)**, seçim kuralından bilinçli sapmayla. YOLO26n yedek kamera modeli.
+> Tek başına okunabilen anlatım: **[model-secimi.md](../model-secimi.md)** · Karar kaydı: [kararlar.md](../kararlar.md) (2026-11-02)
+
+Sonraki deneylerde (1024, D40) kullanılacak s modeli seçildi. Aşağıdaki tablo, seçimi etkileyen ölçütleri bir araya
+getiriyor (val, yerel FP32; süre `deneyler.md`'deki Kaggle runtime'ı).
+
+| Ölçüt | baseline (YOLOv8s) | e2 (YOLO11s) | e3 (YOLO26s) | e4 (YOLO26n) |
+|---|---|---|---|---|
+| mAP50 | 0,571 | 0,582 | **0,589** | 0,560 |
+| e3'e fark (1 puan kuralı) | −1,8 (ayrılıyor) | −0,7 (ayrılamıyor) | — | −2,9 (ayrılıyor) |
+| D40 AP50 | 0,464 | 0,477 | **0,500** | 0,458 |
+| Japonya+Hindistan (0,547'ye fark) | 0,522 (−2,5) | 0,522 (−2,5) | **0,537 (−1,0)** | 0,509 (−3,8) |
+| Norveç | **0,295** | 0,265 | 0,280 | 0,239 |
+| FPS GTX 1650 (hedef 15) | 53,2 ✅ | **53,4** ✅ | 50,5 ✅ | 61,2 ✅ |
+| FPS CPU (hedef 15) | 9,5 ❌ | 10,6 ❌ | 9,9 ❌ | **23,4** ✅ |
+| Kaggle süresi (640, 50 epoch) | 4 sa 55 dk | 7 sa 11 dk | 8 sa 22 dk | 5 sa 21 dk |
+
+**1. Kuralın harfiyen sonucu (kararlar.md, 2026-10-31):** s modelleri içinde mAP50'si en yüksek olan e3 (0,589).
+e2 ile farkı 0,7 puan, yani 1 puanın altında → kurala göre GTX 1650 FPS'i yüksek olan seçilir: **e2 (YOLO11s)**,
+53,4 FPS'e karşı 50,5.
+
+**2. Seçilen: e3 (YOLO26s). ⚠️ Kuraldan bilinçli sapma (2026-11-02'de onaylandı).**
+Gerekçe:
+- **Kuralın FPS'e bakmasının amacı kamera hedefiydi.** İki model de GTX 1650'de hedefin (15 FPS) üç katından hızlı;
+  aradaki 2,9 FPS'lik fark kamerada hissedilmez. Bu durumda FPS'e göre seçmek pratik bir şey kazandırmıyor.
+- **Sonraki deneylerin hedeflediği yerlerin üçünde de e3 önde:** D40'ta +2,3 puan (D40 deneyleri bu sınıf için),
+  Japonya+Hindistan'da +1,5 puan (referansa fark 1,0 puana iniyor; ara rapordaki ana karşılaştırma), Norveç'te +1,5
+  puan (1024 deneyi bu ülke için). İlk ikisi 1 puan sınırının üstünde.
+- e3 genel mAP50'de de üç s modelinin en iyisi (fark küçük olsa da yönü aynı).
+
+**Seçimin zayıf yanları (dürüst değerlendirme):**
+- **Eğitim süresi:** e3, e2'den yaklaşık %16 daha uzun sürdü (8 sa 22 dk / 7 sa 11 dk). 1024 deneyi bu farkı büyütür
+  ve Kaggle kotasını daha çok zorlar. Seçimdeki en somut maliyet bu.
+- **D40 ve Japonya+Hindistan alt kümeleri genelden küçük** (586 ve 2.280 kutu); farklar tek seed'le ölçüldü, bir
+  kısmı oynaklık olabilir.
+- Ülkelerde tablo karışık: e3, e2'den Japonya, Hindistan, Norveç ve China_MotorBike'ta önde; ABD (−2,4) ve Çek'te geride.
+
+**Kurala uyulursa (e2 seçilirse):** genel doğrulukta pratik bir kayıp yok (0,7 puan), eğitimler daha kısa sürer;
+ama D40 ve Japonya+Hindistan'da 1 puandan fazla geriden başlanır.
+
+**3. YOLO26n'in (e4) rolü:** Ana model adayı değil (s modellerinden ~3 puan düşük, D40 ve Norveç'te en zayıf).
+**GPU'suz bilgisayarlar için yedek kamera modeli** olarak tutulur (CPU'da 15 FPS hedefini geçen tek model). Üzerinde
+1024 / D40 deneyi yapılmaz; Adım 8'de (kamera) seçenek olarak sunulur.
+
+**4. Baseline (YOLOv8s):** Referansla aynı mimari olduğu için raporda karşılaştırma noktası olarak kalır; sonraki
+deneylere geçmez.
+
+**5. Sonraki deneylerin adları:** `e5_yolo26s_1024`, `e6_yolo26s_clspw`, `e7_yolo26s_d40x2`; ayar hücresinde
+`MODEL = "yolo26s.pt"`. Her biri **e3'e karşı** karşılaştırılır.
 
 ---
 

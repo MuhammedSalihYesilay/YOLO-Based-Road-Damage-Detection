@@ -78,6 +78,7 @@ GPS eşleştirme → veritabanına kayıt → harita gösterimi → aynı hasar�
   ek özellik = GPS eşleştirme + veritabanı + harita + takip
 - Farklı YOLO modelleri (YOLOv8s, YOLO11s, YOLO26s; kamera için YOLO26n) ve augmentation
   yöntemleri karşılaştırılacak (ayrıntı: docs/arastirma/yolo-modelleri.md)
+- Seçilen model: YOLO26s (ayrıntı: docs/model-secimi.md). YOLO26n yedek kamera modeli (GPU'suz bilgisayarlar için)
 
 ## Değerlendirme
 - Metrikler: Precision, Recall, F1, mAP50 (ana metrik), mAP50-95, sınıf başına AP,
@@ -125,6 +126,7 @@ yol-hasari/
   src/             ← bizim kodumuz (analysis/, data/, eval/)
   docs/adimlar/    ← adım belgeleri (her adımda ne yapıldı, nasıl tekrar edilir, hocaya anlatım)
   docs/deneyler.md ← tüm deneylerin ayar ve sonuç tablosu (val, yerel FP32)
+  docs/model-secimi.md ← neden YOLO26s seçildi (4 model karşılaştırması, kuraldan sapma, sınırlamalar)
   docs/degerlendirme/ ← değerlendirme özetleri (evaluate.py / measure_fps.py kopyası, git'e girer)
   runs/kaggle/     ← Kaggle'dan indirilen eğitim çıktıları (best.pt, args.yaml, results.csv, grafikler; git dışı)
   runs/eval/       ← değerlendirme ham çıktıları (git dışı)
