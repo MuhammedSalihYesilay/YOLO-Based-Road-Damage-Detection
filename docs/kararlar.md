@@ -162,3 +162,11 @@ Her kayıt: tarih — karar — gerekçe.
   D40 ve Japonya+Hindistan genel val'den küçük alt kümeler. YOLO26n CPU'da 15 FPS'i geçen tek model (23,4 FPS),
   doğrulukta s modellerinin ~3 puan altında (0,560).
 - Ayrıntı: [model-secimi.md](model-secimi.md), [adim-6-karsilastirma.md §6.4](adimlar/adim-6-karsilastirma.md)
+
+## 2026-11-05 — Ara rapor: literatür taraması taslağı, kaynak stili IEEE
+- **Karar:** Literatür taraması taslağı hazırlandı; 19 kaynak elle doğrulandı (her biri birincil kaynakta açıldı, birebir
+  alıntılı kontrol tablosu, tüm satırlar "Doğru"). Kaynak stili **IEEE** (numaralı [1], [2] …). Hakemsiz/ikincil kaynaklar
+  (HF model kartı, bloglar) ve açılamayan sayfalar metne alınmadı.
+- **Gerekçe:** Şablon "proper in-text citations" istiyor ama stil belirtmiyor; IEEE mühendislikte standart ve numaralı
+  atıf metni kısa tutuyor. Uydurma kaynak riskine karşı her iddia bir alıntıyla bağlandı.
+- Ayrıntı: [rapor/literatur-taramasi.md](rapor/literatur-taramasi.md) (git dışı kopyası `rapor/ozel/` altında, ikisi aynı)
