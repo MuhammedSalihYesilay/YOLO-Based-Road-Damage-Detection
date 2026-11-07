@@ -44,9 +44,13 @@ class BreakdownValidator(DetectionValidator):
         super().init_metrics(model)
         self.im_names = []  # görüntü sırası; metrics.stats listeleriyle aynı sırada dolar
         self.per_image = None
+        self.input_shapes = set()  # modele giren tensörlerin (yükseklik, genişlik) boyutları; imgsz doğrulaması için
 
     def update_metrics(self, preds, batch):
         """Her batch'te çağrılır. Asıl metot her görüntü için stats'a bir satır ekler; adları da aynı sırayla tutarız."""
+        # Ultralytics .pt modelde giriş boyutunu loglamıyor; istenen imgsz'nin gerçekten kullanıldığını
+        # modele giren batch tensörünün boyutundan (B, 3, H, W) kanıtlıyoruz
+        self.input_shapes.add(tuple(int(s) for s in batch["img"].shape[2:]))
         self.im_names.extend(Path(f).name for f in batch["im_file"][: len(preds)])
         super().update_metrics(preds, batch)
 
@@ -159,6 +163,12 @@ def main():
     if len(im_names) != len(stats["tp"]):  # dosya adları ile sonuç satırları aynı sırada ve aynı sayıda olmalı
         sys.exit(f"Görüntü adı ({len(im_names)}) ve sonuç ({len(stats['tp'])}) sayıları tutmuyor.")
 
+    # imgsz doğrulaması: tensörlerin uzun kenarı istenen imgsz olmalı (val kare letterbox kullanıyor → imgsz x imgsz)
+    shapes = sorted(validator.input_shapes)
+    if any(max(s) != args.imgsz for s in shapes):
+        sys.exit(f"imgsz tutmuyor: istenen {args.imgsz}, modele giren tensör boyutları {shapes}")
+    shapes_txt = ", ".join(f"{h}x{w}" for h, w in shapes)
+
     per_class = per_class_table(stats, np.arange(len(im_names)))
     subsets = subset_table(stats, im_names, args.split_csv)
 
@@ -173,6 +183,7 @@ def main():
     summary = (
         f"# Değerlendirme: {args.name} — {args.split}\n\n"
         f"- Ağırlık: `{args.weights}`\n- imgsz {args.imgsz}, batch {args.batch}, conf/iou Ultralytics val varsayılanı\n"
+        f"- Modele giren tensör boyutu (doğrulandı): {shapes_txt}\n"
         f"- Görüntü: {len(im_names)}, kutu: {int(total['kutu'])}\n\n"
         f"## Sınıf bazında\n\n{to_markdown(per_class)}\n\n"
         f"## Alt kümeler (ülke ve özel)\n\n{to_markdown(subsets)}\n\n"

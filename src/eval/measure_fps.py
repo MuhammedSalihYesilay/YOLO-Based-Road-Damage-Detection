@@ -62,9 +62,14 @@ def measure(model, images, device, imgsz, warmup):
         n_boxes.append(len(r.boxes))  # kontrol amaçlı: model gerçekten kutu üretiyor mu
 
     wall = np.array(wall)
+    # imgsz doğrulaması: Ultralytics'in letterbox'ta gerçekten kullandığı boyut (check_imgsz sonrası, [yükseklik, genişlik])
+    used = model.predictor.imgsz
+    if max(used) != imgsz:
+        raise SystemExit(f"imgsz tutmuyor: istenen {imgsz}, Ultralytics'in kullandığı {used}")
     return {
         "cihaz": "GPU" if device != "cpu" else "CPU",
         "imgsz": imgsz,
+        "kullanılan imgsz": "x".join(map(str, used)),
         "görüntü": len(images),
         "ms ort": wall.mean(),
         "ms medyan": np.median(wall),

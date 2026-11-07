@@ -123,11 +123,14 @@ Komutlar proje klasöründen (`C:\dev\yol-hasari`), PowerShell'de:
    .\venv\Scripts\python.exe src\eval\evaluate.py --weights runs/kaggle/e2_yolo11s/weights/best.pt --name e2_yolo11s
    ```
    1024 deneyinde sona `--imgsz 1024` eklenir. Script "Tümü" sonucunu Ultralytics'in sonucuyla karşılaştırır; tutmazsa durur.
+   Ayrıca modele giren tensörün boyutunu kontrol eder ve summary.md'ye "Modele giren tensör boyutu (doğrulandı)" olarak
+   yazar; istenen imgsz ile tutmazsa durur (2026-11-07'de eklendi: Ultralytics `.pt` modelde bu boyutu loglamıyor).
+   GTX 1650'de bellek yetmezse `--batch 8` (batch mAP'yi pratikte değiştirmez); deneyler.md'ye not düşülür.
 3. **Hız (GTX 1650 + CPU, FP32, batch 1):**
    ```powershell
    .\venv\Scripts\python.exe src\eval\measure_fps.py --weights runs/kaggle/e2_yolo11s/weights/best.pt --name e2_yolo11s
    ```
-   1024 deneyinde `--imgsz 1024`.
+   1024 deneyinde `--imgsz 1024`. fps.csv'deki `kullanılan imgsz` sütunu Ultralytics'in gerçekten kullandığı boyutu gösterir.
 4. **`docs/deneyler.md`'ye ekle:**
    - *Ayarlar* tablosu: #, tarih, ad, model, imgsz, epoch (`durduğu / 50`, `results.csv`'nin satır sayısı), batch (uyarı
      varsa gerçek değer), augmentation/değişiklik (ör. `cls_pw 0.5`), **ortam ve gerçek süre** (Kaggle log'undaki
@@ -147,12 +150,13 @@ Komutlar proje klasöründen (`C:\dev\yol-hasari`), PowerShell'de:
 | e2_yolo11s | 0,582 | +1,1 | 0,477 | 0,265 | 0,522 | 53,4 | Genelde biraz iyi, Norveç'te kötü (§6.1) |
 | e3_yolo26s | 0,589 | +1,8 | 0,500 | 0,280 | 0,537 | 50,5 | En yüksek mAP50 ve D40; e2'den farkı 1 puanın altında (§6.2) |
 | e4_yolo26n | 0,560 | −1,1 | 0,458 | 0,239 | 0,509 | 61,2 | s'den ~3 puan düşük, CPU'da 23 FPS (§6.3) |
-| e5 (1024) | | | | | | | |
+| e5_yolo26s_1024 | 0,609 | +3,8 | 0,516 | 0,380 | 0,544 | 25,0 | e3'ten +2,0; Norveç +10,0; FPS yarıya indi; şu anki en iyi aday (§6.5) |
 | e6 (cls_pw) | | | | | | | |
 | e7 (D40 ×2) | | | | | | | |
 
 **Seçilen model:** **YOLO26s (e3)** (2026-11-02; gerekçe §6.4 ve [model-secimi.md](../model-secimi.md)).
 YOLO26n yedek kamera modeli.
+**Şu anki en iyi aday:** **e5 (YOLO26s, imgsz 1024)** (2026-11-07, §6.5). Nihai model seçimi e6 ve e7 bitince yapılacak.
 
 ### 6.1 e2 YOLO11s sonuçları (val seti, yerel ölçüm, FP32)
 Eğitim ayarları baseline ile birebir aynı (`args.yaml` kontrol edildi); tek fark model: YOLOv8s yerine YOLO11s.
@@ -498,6 +502,128 @@ deneylere geçmez.
 
 **5. Sonraki deneylerin adları:** `e5_yolo26s_1024`, `e6_yolo26s_clspw`, `e7_yolo26s_d40x2`; ayar hücresinde
 `MODEL = "yolo26s.pt"`. Her biri **e3'e karşı** karşılaştırılır.
+
+### 6.5 e5 YOLO26s, imgsz 1024 sonuçları (val seti, yerel ölçüm, FP32)
+> **Karar (2026-11-07):** 1024 val'de kazandırıyor; **e5 şu anki en iyi aday**. Nihai model seçimi e6 ve e7 bitince
+> yapılacak (1024 + e6/e7'den kazanan ayar birleştirilebilir). Kayıt: [kararlar.md](../kararlar.md) (2026-11-07)
+
+**Eğitim:** e3 ile birebir aynı ayarlar; tek fark imgsz 640 → 1024. Eğitim Kaggle'ın 12 saatlik sınırı yüzünden
+**iki oturumda** yapıldı:
+- **Version 4:** epoch 1–26. `MAX_HOURS` sınırına gelince notebook eğitimi `last.pt` kaydedildikten sonra düzgünce
+  durdurdu (§3.2). Süre ~6 sa 5 dk (results.csv `time` sütunu; devir notunda 6,30 sa). Süre sınırıyla durduğu için
+  log'da "epochs completed" satırı yok.
+- **Version 5:** `MODE="devam"`, V4'ün output'u input olarak eklendi, `last.pt`'den resume; epoch 27–50. 50 epoch
+  normal bitti. Süre 6 sa 50 dk (log: "24 epochs completed in 6.837 hours").
+- Toplam **≈ 13 saat**; e3'ün (8 sa 22 dk) ~1,5 katı.
+- `args.yaml` farkları kontrol edildi: imgsz dışındaki farklar (`optimizer: MuSGD`, `warmup_bias_lr: 0.0`, `resume`,
+  `model: last.pt`) resume'dan geliyor. Resume ayarları checkpoint'ten okur; e3'ün `best.pt` checkpoint'inde de
+  `MuSGD` ve `0.0` yazıyor. Batch iki koşuda da 16 (Ultralytics yarıya indirmedi). Yani tek değişken kuralı korundu.
+- results.csv'de en yüksek val mAP50 epoch 44'te (0,633); son epoch'larda hafif düşüş (0,628). Kaggle'ın `best.pt`
+  doğrulaması 0,631 (FP16, yalnızca not).
+
+**Ölçüm:** `evaluate.py --imgsz 1024` (val, batch 16; GTX 1650'in 4 GB belleği yetti, batch düşürülmedi) ve
+`measure_fps.py --imgsz 1024`. Modele giren tensörün **1024x1024** olduğu çıktıdan doğrulandı (summary.md ve fps.csv).
+Ayrıntılı tablolar: [e5_yolo26s_1024_val/summary.md](../degerlendirme/e5_yolo26s_1024_val/summary.md).
+
+**Genel**
+| Model | P | R | F1 | **mAP50** | mAP50-95 |
+|---|---|---|---|---|---|
+| baseline (YOLOv8s, 640) | 0,621 | 0,541 | 0,578 | 0,571 | 0,286 |
+| e3 (YOLO26s, 640) | 0,641 | 0,547 | 0,591 | 0,589 | 0,294 |
+| e5 (YOLO26s, 1024) | 0,633 | 0,578 | 0,605 | **0,609** | 0,309 |
+| e5 − e3 | −0,8 | **+3,1** | +1,4 | **+2,0** | +1,5 |
+
+*Yorum:* 1024, genel mAP50'yi 2,0 puan artırdı. Önceki deneylerden farklı olarak artış **recall**'dan geliyor (+3,1):
+model daha fazla hasar buluyor; precision ise neredeyse aynı (−0,8). Yani büyük görüntü, 640'ta "görünmeyen" hasarları
+görünür yapıyor. mAP50-95 de +1,5: kutular da daha iyi oturuyor.
+
+**Sınıf bazında (AP50)**
+| Sınıf | e3 | e5 | Fark |
+|---|---|---|---|
+| D00 boyuna çatlak | 0,578 | 0,604 | +2,6 |
+| D10 enine çatlak | 0,588 | 0,620 | +3,2 |
+| D20 timsah çatlağı | 0,691 | 0,697 | +0,6 |
+| D40 çukur | 0,500 | **0,516** | +1,6 |
+
+*Yorum:* En çok kazanan **ince çatlaklar** (D10 +3,2, D00 +2,6): birkaç piksel genişliğindeki bir çatlak 640'a
+küçültülünce kayboluyor, 1024'te kalıyor. Geniş alan kaplayan timsah çatlağı zaten büyük bir nesne; neredeyse değişmedi
+(+0,6). Çukurda (D40) recall 0,430 → 0,488; ama D40 hâlâ en zayıf sınıf. Çözünürlük çukur sorununu yalnızca kısmen
+çözüyor; D40 deneyleri (e6, e7) gerekli olmaya devam ediyor.
+
+**Ülke bazında (mAP50)**
+| Ülke | Kutu | e3 | e5 | Fark |
+|---|---|---|---|---|
+| China_MotorBike | 439 | 0,924 | 0,909 | −1,5 |
+| ABD | 1.083 | 0,616 | 0,649 | +3,3 |
+| China_Drone | 308 | 0,666 | 0,688 | +2,2 |
+| Japonya | 1.582 | 0,574 | 0,579 | +0,5 |
+| Çek Cumhuriyeti | 157 | 0,426 | 0,517 | +9,1 |
+| Hindistan | 698 | 0,433 | 0,464 | +3,1 |
+| **Norveç** | 960 | 0,280 | **0,380** | **+10,0** |
+
+*Yorum:*
+- **Norveç'te en büyük artış (+10,0).** Recall 0,280 → 0,419. Dört sınıfın hepsi arttı: D00 +6,9, D10 +12,2, D20 +6,7,
+  D40 +14,5 (0,116 → 0,261). Adım 2'deki analiz doğrulandı: Norveç'in sorunu modelde değil **çözünürlükte**
+  (640'ta kutuların ~%23'ü 8 pikselin altına iniyordu, 1024'te ~%10). Norveç görüntüleri 1280 px'e küçültülmüş olduğu
+  için 1024 neredeyse orijinal ayrıntıyı veriyor. Yine de Norveç 0,380 ile hâlâ en düşük ülke.
+- **Japonya'da artış yok denecek kadar az (+0,5).** Japonya görüntüleri zaten 600×600; 1024'e büyütmek yeni ayrıntı
+  getirmiyor, yalnızca büyütüyor. Kazanç, kaynak görüntüsü büyük olan ülkelerde (Norveç) ve ince çatlaklarda.
+- **ABD (+3,3, 1.083 kutu) ve Hindistan (+3,1)** büyük alt kümelerde anlamlı artış.
+- **Çek (+9,1, 157 kutu) ve China_MotorBike (−1,5, 439 kutu)** küçük alt kümeler; birkaç tahminle oynayabilir. Yön
+  göstergesi olarak okunmalı.
+
+**Özel alt kümeler**
+| Alt küme | e3 | e5 | Fark |
+|---|---|---|---|
+| Drone hariç | 0,584 | 0,605 | +2,1 |
+| Japonya+Hindistan | 0,537 | **0,544** | +0,7 |
+
+*Yorum:* Japonya+Hindistan'daki artış 1 puanın altında (Japonya +0,5, Hindistan +3,1; Japonya daha büyük alt küme).
+Referansın 0,547'sine fark 1,0 puandan **0,3 puana** indi (val'de ön karşılaştırma; kesin karşılaştırma Adım 9'da test
+setinde). Drone hariç sonuç genelle aynı yönde: kazanç Drone görüntülerinden gelmiyor.
+
+**Hız (FPS, FP32, batch 1)**
+| | e3 (640) | e5 (1024) | Oran |
+|---|---|---|---|
+| GTX 1650 FPS | 50,5 | **25,0** | ×0,50 |
+| GTX 1650 ms ortalama / p95 | 19,8 / 22,3 | 40,0 / 44,5 | |
+| GTX 1650 çıkarım ms | 16,3 | 34,6 | ×2,1 |
+| GTX 1650 ön işleme ms | 1,7 | 3,7 | |
+| CPU FPS | 9,9 | 4,2 | ×0,42 |
+
+*Yorum:*
+- İşlem sayısı piksel sayısıyla artar: (1024/640)² ≈ **2,6 kat**. GTX 1650'de çıkarım süresi 2,1 kat arttı, FPS
+  yarıya indi.
+- **15 FPS hedefi tutuyor:** ortalama 25,0 FPS; en yavaş %5'lik karelerde bile (44,5 ms) ~22 FPS.
+- CPU'da 4,2 FPS; e3 de CPU'da hedefi tutmuyordu (9,9). GPU'suz bilgisayarda yedek kamera modeli YOLO26n (e4) olmaya
+  devam ediyor. Arayüzde kamera için 640'ta çalıştırmak da bir seçenek (1024 modeli 640'ta çalıştırmak ayrıca ölçülmedi).
+
+**Bu fark anlamlı mı? (1 puan kuralı, kararlar.md 2026-10-31)**
+- **e5 − e3 = +2,0 puan genel mAP50:** 1 puan sınırının açıkça üstünde. **1024 val'de kazandırıyor.** Birleşik model
+  koşulunun 1024 yarısı sağlandı; diğer yarısı e6 veya e7'nin kazandırması.
+- Hedef alt kümelerde: Norveç **+10,0** (açık kazanç), D40 **+1,6** (sınırın üstünde, ama 586 kutuluk alt küme),
+  Japonya+Hindistan **+0,7** (sınırın altında, ayrılamıyor).
+- Tek seed uyarısı geçerli; ama +2,0 puan, s modelleri arasındaki farklardan (en fazla 1,8) büyük ve artış 4 sınıfın
+  hepsinde, 7 ülkenin 6'sında aynı yönde.
+- **Bedeli:** eğitim ~1,5 kat uzun (≈ 13 sa, iki Kaggle oturumu), GPU FPS yarıya indi (hedef yine tutuyor).
+- Not: Kaggle'ın değeri ile yerel ölçüm arasındaki fark e5'te 2,2 puan (0,631 / 0,609), e3'te 1,1 puandı (0,600 /
+  0,589). Resmî değer yerel ölçüm olduğu için sonucu değiştirmiyor.
+
+**Sayıların anlamı (kısaca)**
+- R 0,578: gerçek hasarların ~%58'i bulunuyor (e3'te ~%55). R sınıf ortalaması olduğu için kaba bir hesapla 5.227
+  kutuda ~160 hasar daha demek.
+- Norveç 0,280 → 0,380: göreli olarak %36 artış.
+- 25 FPS: bir görüntü ~40 ms; kamera saniyede 25 kare işleyebilir.
+
+**Hocaya nasıl anlatırım (e5)**
+"Seçtiğimiz YOLO26s'i aynı ayarlarla, yalnızca görüntü boyutunu 640'tan 1024'e çıkararak yeniden eğittik. Eğitim
+13 saat sürdüğü için Kaggle'ın 12 saatlik sınırına sığmadı; iki oturumda, ilk oturumun kaydettiği checkpoint'ten
+kaldığı yerden devam ettirerek tamamladık. Ölçümü aynı script ve aynı bilgisayarla yaptık, modele giren görüntünün
+gerçekten 1024 olduğunu çıktıdan doğruladık. Genel mAP50 0,589'dan 0,609'a çıktı; artış modelin daha fazla hasar
+bulmasından geliyor. En büyük kazanç küçük çatlakların olduğu Norveç'te: 10 puan. Bu, veri analizinde 640'ta
+Norveç kutularının dörtte birinin 8 pikselin altına indiğini gösteren bulgumuzu doğruluyor. Japonya'da ise neredeyse
+fark yok, çünkü o görüntüler zaten küçük. Bedeli hız: GTX 1650'de 50 FPS'ten 25'e indi, ama 15 FPS hedefinin hâlâ
+üstünde. e5'i şu an en iyi aday olarak tutuyoruz; nihai seçimi çukur sınıfı deneylerinden sonra yapacağız."
 
 ---
 

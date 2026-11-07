@@ -170,3 +170,20 @@ Her kayıt: tarih — karar — gerekçe.
 - **Gerekçe:** Şablon "proper in-text citations" istiyor ama stil belirtmiyor; IEEE mühendislikte standart ve numaralı
   atıf metni kısa tutuyor. Uydurma kaynak riskine karşı her iddia bir alıntıyla bağlandı.
 - Ayrıntı: [rapor/literatur-taramasi.md](rapor/literatur-taramasi.md) (git dışı kopyası `rapor/ozel/` altında, ikisi aynı)
+
+## 2026-11-07 — e5 (imgsz 1024): 1024 val'de kazandırıyor, şu anki en iyi aday
+- **Karar:** e5 (YOLO26s, imgsz 1024) **şu anki en iyi aday**. Nihai model seçimi e6 ve e7 bitince yapılacak; 1024 ile
+  e6/e7'den kazanan ayar birleştirilebilir (birleşik model koşulunun 1024 yarısı sağlandı). `model-secimi.md` ve
+  CLAUDE.md'deki "seçilen model" (YOLO26s, e3) nihai seçime kadar değişmez.
+- **Gerekçe:** Yerel FP32 val mAP50 **0,609**, e3'ten **+2,0 puan** (1 puan kuralının açıkça üstünde); artış recall'dan
+  (+3,1) ve 4 sınıfın hepsinde. Norveç 0,280 → 0,380 (+10,0), D40 0,500 → 0,516 (+1,6), Japonya+Hindistan 0,537 → 0,544
+  (+0,7; referansın 0,547'sine 0,3 puan). Bedeli: GTX 1650 FPS 50,5 → 25,0 (15 hedefi tutuyor), CPU 4,2; eğitim ≈ 13 sa
+  (e3: 8 sa 22 dk). Tek seed.
+- **Eğitim iki oturumda:** V4 epoch 1–26 (`MAX_HOURS` ile durdu, ~6 sa 5 dk results.csv'den) + V5 `MODE="devam"` ile
+  resume, epoch 27–50 (6,837 sa, log). args.yaml'daki optimizer/warmup_bias_lr farkı resume kaynaklı (e3 checkpoint'iyle aynı).
+- **Kaggle sütunu:** deneyler.md'nin "Kaggle eğitim sonu" sütununa `best.pt` doğrulaması (0,631) yazılır; önceki
+  deneylerde de bu değer yazılmıştı (en iyi epoch'la aynıydı). Özet satırındaki 0,633 (epoch 44) not olarak durur.
+- **Ölçüm eki:** `evaluate.py` modele giren tensör boyutunu, `measure_fps.py` Ultralytics'in kullandığı imgsz'yi kontrol
+  edip çıktıya yazar; istenen imgsz ile tutmazsa durur. Gerekçe: Ultralytics `.pt` modelde giriş boyutunu loglamıyor;
+  önceki özetler yalnızca verilen argümanı tekrarlıyordu. Varsayılanlar değişmedi.
+- Ayrıntı: [adim-6-karsilastirma.md §6.5](adimlar/adim-6-karsilastirma.md), [deneyler.md](deneyler.md)
