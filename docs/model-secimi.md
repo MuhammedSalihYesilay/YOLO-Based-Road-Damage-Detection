@@ -1,12 +1,45 @@
-# Model seçimi: neden YOLO26s? (2026-11-02)
+# Model seçimi: neden YOLO26s, imgsz 1024 (e5)?
 
-**Karar:** Sonraki deneyler (görüntü boyutu 1024, çukur sınıfı için dengeleme) **YOLO26s** ile yapılacak.
-**YOLO26n** GPU'su olmayan bilgisayarlar için yedek kamera modeli olarak kalacak.
-Karar kaydı: [kararlar.md, 2026-11-02](kararlar.md). Sayıların kaynağı: [deneyler.md](deneyler.md) ve
-`docs/degerlendirme/<model>_val/` altındaki özet CSV'ler. Ayrıntılı yorumlar:
-[adim-6-karsilastirma.md §6.1–6.4](adimlar/adim-6-karsilastirma.md).
+**Final model (2026-11-08): e5 — YOLO26s, imgsz 1024.** GTX 1650'de 25,0 FPS (hedef 15), CPU'da 4,2 FPS; bu yüzden
+GPU'su olmayan bilgisayarlarda kamera için **YOLO26n (e4)** yedek model (CPU 23,4 FPS).
+Seçim iki aşamada yapıldı: önce mimari (2026-11-02: YOLO26s, §1–6), sonra aynı mimaride ayar deneyleri
+(2026-11-08: imgsz 1024, §7). Karar kayıtları: [kararlar.md](kararlar.md) (2026-11-02, 2026-11-08). Sayıların kaynağı:
+[deneyler.md](deneyler.md) ve `docs/degerlendirme/<model>_val/` altındaki özet CSV'ler. Ayrıntılı yorumlar:
+[adim-6-karsilastirma.md §6](adimlar/adim-6-karsilastirma.md).
+
+## Kısa özet (sunumdan önce bak)
+Tüm sayılar val seti, yerel ölçüm (`evaluate.py`, FP32). "Puan" = mAP'de 0,01. Her deney bir öncekinden **tek bir
+şeyi** değiştiriyor.
+
+| Deney | Ne değişti | Val mAP50 (yerel FP32) | Sonuç | Neden seçilmedi / neden seçildi |
+|---|---|---|---|---|
+| baseline | YOLOv8s, 640 (referansla aynı mimari) | 0,571 | Karşılaştırma noktası | Diğer s modellerinin gerisinde (e3'ten −1,8) |
+| e2 | Model: YOLO11s | 0,582 | baseline'dan +1,1 | e3'ten −0,7 (ayrılamıyor); çukurda (−2,3) ve Japonya+Hindistan'da (−1,5) e3 önde |
+| e3 | Model: YOLO26s | 0,589 | Mimari olarak seçildi (2026-11-02) | Sonraki deneylerin tabanı oldu; 640'ta kaldığı için e5 geçti |
+| e4 | Model: YOLO26n (en küçük) | 0,560 | e3'ten −2,9 | Ana model için zayıf; CPU'da 23,4 FPS → **yedek kamera modeli** |
+| **e5** | **imgsz 640 → 1024** | **0,609** | **e3'ten +2,0 → FİNAL MODEL** | En yüksek mAP50; Norveç +10,0, ince çatlaklar (D00 +2,6, D10 +3,2); GPU'da 25 FPS, hedef tutuyor |
+| e6 | Sınıf ağırlığı `cls_pw 0.5` | 0,590 | e3'ten +0,1 | 1 puanın altında; çukurda recall ↑ precision ↓, AP değişmedi |
+| e7 | Çukurlu görüntüler 2 kez (oversampling) | 0,593 | e3'ten +0,4 | 1 puanın altında; ama çukurda AP +2,0 (recall +8,2, precision −4,1) |
+
+Birleşik model (1024 + D40 ×2) yapılmadı: kurala göre iki ayarın da ayrı ayrı kazandırması gerekiyordu. Zaman ve kota
+kalırsa final teslimden önce isteğe bağlı deney / gelecek çalışma.
+
+**Hocaya böyle anlat**
+- **1 puan kuralı:** Deneylerden önce koyduk: bir değişiklik val mAP50'yi en az 1 puan artırmıyorsa "kazandırdı"
+  demiyoruz. Her modeli tek seed'le eğittik, daha küçük farklar şans eseri çıkabilir.
+- **Tek değişken:** Her deneyde yalnızca bir şeyi değiştirdik; veri, epoch, batch, seed, optimizer ve ölçüm script'i
+  aynı kaldı. Böylece bir fark çıkınca nedenini biliyoruz.
+- **1024 neden kazandı:** Norveç görüntüleri büyük, hasarlar küçük; 640'a küçültünce kutuların ~%23'ü 8 pikselin altına
+  iniyor. 1024'te Norveç +10 puan, ince çatlaklar (boyuna, enine) +3 puan civarı. Bedeli hız: 50'den 25 FPS'e indi ama
+  15 hedefinin üstünde.
+- **Oversampling ve çukur:** Çukurlu görüntüleri iki kez göstermek genel sonucu değiştirmedi ama çukurda AP'yi 2 puan
+  artırdı: model çukurların %43'ü yerine %51'ini buluyor, biraz daha fazla yanlış alarmla. Raporda bulgu olarak
+  yazıyoruz, 1024 ile birleştirmeyi gelecek çalışma olarak bırakıyoruz.
 
 ---
+
+> **Bölüm 1–6 mimari seçimini anlatır (2026-11-02):** YOLO26s seçildi; sonraki deneyler (e5–e7) bu modelle yapıldı.
+> Final seçim (e5) için §7.
 
 ## 1. Hangi modelleri, neden karşılaştırdık?
 | Deney | Model | Neden seçildi |
@@ -88,15 +121,27 @@ büyüyecek ve Kaggle kotasını daha çok zorlayacak. Kuraldan sapma ve gerekç
   ve China_Drone (308) gibi alt kümelerde birkaç tahmin sonucu birkaç puan oynatabiliyor.
 - **Val, test değil:** Bütün sayılar val setinde. Referansla kesin karşılaştırma Adım 9'da test setinde yapılacak.
 
-## 7. Sırada ne var?
-Hepsi **YOLO26s** ile, ayarlar e3 ile aynı, tek değişken değişerek; her biri **e3'e karşı** karşılaştırılacak:
-| Deney | Değişen | Hedef |
-|---|---|---|
-| e5_yolo26s_1024 | imgsz 640 → 1024 | Norveç'teki küçük çatlaklar (640'ta kutuların ~%23'ü 8 pikselin altında) |
-| e6_yolo26s_clspw | sınıf ağırlığı `cls_pw 0.5` | Çukur (D40): az örnekli sınıfa kayıpta daha çok ağırlık |
-| e7_yolo26s_d40x2 | D40'lı görüntüler 2 kez (oversampling) | Çukur (D40): aynı soruya veri tekrarıyla cevap |
-İkisi de kazandırırsa 1024 ile iyi olan D40 yöntemi birleştirilir. Ayrıntı:
-[adim-6-karsilastirma.md §2–3](adimlar/adim-6-karsilastirma.md).
+## 7. Final seçim: YOLO26s, imgsz 1024 (e5) (2026-11-08)
+YOLO26s ile, ayarlar e3 ile aynı, tek değişken değişerek üç deney yapıldı; her biri **e3'e karşı** karşılaştırıldı:
+| | e3 (640) | **e5 (1024)** | e6 (`cls_pw 0.5`) | e7 (D40 ×2) |
+|---|---|---|---|---|
+| Hedef | — | Norveç'teki küçük çatlaklar | Çukur (D40): kayıpta ağırlık | Çukur (D40): veri tekrarı |
+| **mAP50** | 0,589 | **0,609** | 0,590 | 0,593 |
+| e3'e fark (1 puan kuralı) | — | **+2,0 (kazandırıyor)** | +0,1 (kazandırmıyor) | +0,4 (kazandırmıyor) |
+| D40 AP50 | 0,500 | 0,516 | 0,503 | **0,520** |
+| Norveç | 0,280 | **0,380** | 0,308 | 0,316 |
+| Japonya+Hindistan (referans 0,547) | 0,537 | **0,544** | 0,534 | 0,531 |
+| FPS GTX 1650 / CPU | 50,5 / 9,9 | 25,0 / 4,2 | 51,9 / 11,0 | 51,8 / 10,9 |
+| Eğitim döngüsü (results.csv) | 7 sa 5 dk | 12 sa 55 dk (2 oturum) | 5 sa 5 dk | 6 sa 7 dk |
+
+- **e5 seçildi:** 1 puan kuralını geçen tek ayar; artış 4 sınıfın hepsinde, en çok Norveç ve ince çatlaklarda.
+  Japonya+Hindistan'da referansa fark 0,3 puan (val'de ön karşılaştırma).
+- **Bedeli hız:** GTX 1650'de 25,0 FPS, 15 hedefini tutuyor. CPU'da 4,2 FPS; GPU'suz bilgisayarda kamera için **YOLO26n
+  (e4)** yedek (CPU 23,4 FPS).
+- **Birleşik model yapılmadı:** koşul (1024 **ve** bir D40 yöntemi ayrı ayrı kazandırmalı) sağlanmadı. e7'nin çukur
+  bulgusu (D40 +2,0) raporda yer alır; birleşik model (tahmini ~14,7 sa, iki Kaggle oturumu) zaman ve kota kalırsa
+  isteğe bağlı deney / gelecek çalışma.
+- Test setinde (Adım 9) yalnızca e5 ölçülür. Ayrıntı: [adim-6-karsilastirma.md §6.5–6.7](adimlar/adim-6-karsilastirma.md).
 
 ---
 
@@ -108,7 +153,9 @@ Ama kuralın hıza bakma nedeni kamera hedefiydi ve iki model de hedefin üç ka
 deneylerin hedeflediği üç noktada, yani çukur sınıfında, referansla karşılaştırdığımız Japonya+Hindistan'da ve
 Norveç'te YOLO26s önde. Bu yüzden kuraldan bilinçli olarak saptık ve gerekçesini kayda geçirdik. En küçük model
 YOLO26n doğrulukta 3 puan geride ama CPU'da saniyede 23 kare işleyen tek model; onu GPU'suz bilgisayarlar için yedek
-kamera modeli olarak tutuyoruz."
+kamera modeli olarak tutuyoruz. Sonra YOLO26s üzerinde üç ayarı tek tek denedik: görüntü boyutunu 1024'e çıkarmak
+mAP50'yi 2 puan artırdı ve kuralımızı geçen tek ayar oldu; çukur sınıfı için denediğimiz iki dengeleme yöntemi genel
+sonucu 1 puandan az değiştirdi. Final model bu yüzden 1024 piksellik YOLO26s."
 
 ### Hocanın sorabileceği sorular
 **1. "0,7 puanlık fark gerçek mi, yoksa şans mı?"**

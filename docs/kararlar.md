@@ -205,3 +205,22 @@ Her kayıt: tarih — karar — gerekçe.
 - **e3 ↔ e6 süre farkı (7 sa 5 dk ↔ 5 sa 5 dk):** ~1,6 sa'i 1. epoch'tan (6.658 s ↔ 942 s; muhtemelen Kaggle'da ilk veri
   okuması, doğrulanmadı), kalanı epoch başına ~%8 (oturum/donanım farkı; cls_pw hesap yükünü değiştirmez).
 - Ayrıntı: [adim-6-karsilastirma.md §6.6](adimlar/adim-6-karsilastirma.md), [deneyler.md](deneyler.md)
+
+## 2026-11-08 — e7 (D40 ×2): genelde kazandırmıyor; birleşik model yok; final model e5 (YOLO26s, imgsz 1024)
+- **Karar:** D40 oversampling (×2) val'de **kazandırmıyor** (e7 − e3 = **+0,4 puan** < 1; e6'ya da aynı kural uygulandı).
+  Birleşik model (1024 + D40 ×2) **yapılmaz**. **Final model: e5 (YOLO26s, imgsz 1024).** YOLO26n (e4) GPU'suz
+  bilgisayarlar için yedek kamera modeli. `model-secimi.md` ve CLAUDE.md'deki "seçilen model" e5 olarak güncellendi.
+- **Gerekçe:** Yerel FP32 val mAP50 0,593 (e3 0,589). Birleşik model koşulu (1024 ve bir D40 yöntemi ayrı ayrı
+  kazandırmalı, 2026-10-31) sağlanmadı. e5 yedi deneyin en yükseği (0,609, e3'ten +2,0); GTX 1650'de 25,0 FPS (15 hedefi
+  tutuyor), CPU 4,2 FPS. Tek seed.
+- **Raporda yer alacak bulgu:** e7 çukurda kazandırıyor: D40 AP50 0,500 → 0,520 (+2,0), recall 0,430 → 0,512 (+8,2),
+  precision 0,631 → 0,590 (−4,1). ABD +3,6 (ABD D40 0,348 → 0,458), Norveç +3,6; Japonya+Hindistan 0,531 (−0,6). Diğer
+  sınıflarda yan etki küçük (D00, D10 −0,5).
+- **Birleşik model:** zaman ve kota kalırsa final teslimden önce isteğe bağlı deney / gelecek çalışma. Tahmini eğitim
+  döngüsü ≈ 14,7 sa (e5 12 sa 55 dk × 24.202/21.211), iki Kaggle oturumu; 2026-11-08 itibarıyla kalan kota 10 sa 22 dk.
+  1024 ve oversampling'in D40 kazançlarının üst üste eklenip eklenmediği bilinmiyor.
+- **Kontroller:** args.yaml'da e3'ten tek gerçek fark `data_d40x2.yaml`; yerel veride 2.991 D40'lı görüntü → 24.202 satır
+  → 1.513 adım/epoch, Kaggle `train_batch60520` = 40 × 1.513 ile tutuyor. Kaggle `best.pt` doğrulaması 0,609
+  deneyler.md'ye yazıldı (özet satırıyla aynı).
+- Ayrıntı: [adim-6-karsilastirma.md §6.7](adimlar/adim-6-karsilastirma.md), [model-secimi.md](model-secimi.md),
+  [deneyler.md](deneyler.md)

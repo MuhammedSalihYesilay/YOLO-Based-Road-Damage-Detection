@@ -26,7 +26,7 @@ Kurallar:
 | 5 | `e5_<model>_1024` | imgsz 640 → 1024 | Norveç'teki küçük çatlaklar daha büyük görüntüyle bulunuyor mu? |
 | 6 | `e6_<model>_clspw` | Sınıf ağırlığı (`cls_pw 0.5`) | Az örnekli D40'a daha çok önem vermek çukur sonucunu iyileştiriyor mu? |
 | 7 | `e7_<model>_d40x2` | D40'lı görüntüleri 2 kez göstermek (oversampling) | Aynı soru, farklı yöntemle: veri tekrarı mı, ağırlık mı daha iyi? |
-| (8) | birleşik | 1024 + 6/7'nin iyi olanı | Yalnızca ikisi de val'de ayrı ayrı kazandırırsa: final model adayı |
+| (8) | birleşik | 1024 + 6/7'nin iyi olanı | Yalnızca ikisi de val'de ayrı ayrı kazandırırsa: final model adayı. **Yapılmadı** (e6 ve e7 kazandırmadı, §6.7); isteğe bağlı / gelecek çalışma |
 | (zaman kalırsa) | mosaic kapalı | `mosaic=0` (referans gibi) | Referansın augmentation tercihi bizim veride fark yaratıyor mu? |
 
 `<model>` seçilen modelin kısa adı (ör. `yolo11s`).
@@ -152,12 +152,13 @@ Komutlar proje klasöründen (`C:\dev\yol-hasari`), PowerShell'de:
 | e4_yolo26n | 0,560 | −1,1 | 0,458 | 0,239 | 0,509 | 61,2 | s'den ~3 puan düşük, CPU'da 23 FPS (§6.3) |
 | e5_yolo26s_1024 | 0,609 | +3,8 | 0,516 | 0,380 | 0,544 | 25,0 | e3'ten +2,0; Norveç +10,0; FPS yarıya indi; şu anki en iyi aday (§6.5) |
 | e6_yolo26s_clspw | 0,590 | +1,9 | 0,503 | 0,308 | 0,534 | 51,9 | e3'ten +0,1: kazandırmıyor; D40 recall arttı, precision düştü (§6.6) |
-| e7 (D40 ×2) | | | | | | | |
+| e7_yolo26s_d40x2 | 0,593 | +2,2 | **0,520** | 0,316 | 0,531 | 51,8 | e3'ten +0,4: genelde kazandırmıyor; D40 +2,0 (recall +8,2, precision −4,1) (§6.7) |
 
-**Seçilen model:** **YOLO26s (e3)** (2026-11-02; gerekçe §6.4 ve [model-secimi.md](../model-secimi.md)).
-YOLO26n yedek kamera modeli.
-**Şu anki en iyi aday:** **e5 (YOLO26s, imgsz 1024)** (2026-11-07, §6.5). Nihai model seçimi e6 ve e7 bitince yapılacak.
-e6 (cls_pw) kazandırmadı (2026-11-08, §6.6); 1024 ile birleştirme için tek aday e7.
+**Final model:** **e5 (YOLO26s, imgsz 1024)** (2026-11-08, §6.7 ve [model-secimi.md](../model-secimi.md)).
+YOLO26n (e4) GPU'suz bilgisayarlar için yedek kamera modeli.
+**Mimari seçimi:** YOLO26s (e3) (2026-11-02, §6.4); e5–e7 e3'e karşı karşılaştırıldı.
+e6 (cls_pw) ve e7 (D40 ×2) genel mAP50'de 1 puan kuralını geçmedi (§6.6, §6.7); birleşik model (1024 + D40 ×2)
+yapılmadı, zaman ve kota kalırsa final teslimden önce isteğe bağlı deney / gelecek çalışma.
 
 ### 6.1 e2 YOLO11s sonuçları (val seti, yerel ölçüm, FP32)
 Eğitim ayarları baseline ile birebir aynı (`args.yaml` kontrol edildi); tek fark model: YOLOv8s yerine YOLO11s.
@@ -730,6 +731,115 @@ gerçekten uygulandığını modelin içinden doğruladık. Sonuç: genel mAP50 
 fazla çukur buldu, recall 3,4 puan arttı, ama daha çok yanlış alarm da verdi; ikisi birbirini dengeledi ve AP neredeyse
 değişmedi. Yani ağırlık, modeli çukur demeye daha istekli yaptı ama çukuru daha iyi tanımasını sağlamadı. Bu yüzden
 bu ayarı 1024 ile birleştirmiyoruz; ikinci yöntem olan çukurlu görüntüleri iki kez göstermenin sonucunu bekliyoruz."
+
+### 6.7 e7 YOLO26s, D40 oversampling (×2) sonuçları ve final model seçimi (val seti, yerel ölçüm, FP32)
+> **Karar (2026-11-08):** D40 ×2 genel mAP50'de **kazandırmıyor** (e7 − e3 = +0,4 puan < 1; e6'ya da aynı kural
+> uygulandı). Birleşik model (1024 + D40 ×2) **yapılmadı**. **Final model: e5 (YOLO26s, imgsz 1024).** e7'nin çukur
+> bulgusu raporda yer alır; birleşik model zaman ve kota kalırsa isteğe bağlı deney / gelecek çalışma.
+> Kayıt: [kararlar.md](../kararlar.md) (2026-11-08)
+
+**Eğitim:** e3 ile birebir aynı ayarlar; tek fark train listesi: D40 içeren görüntüler 2 kez yazıldı
+(`args.yaml`: `data: data_d40x2.yaml`; diğer farklar yalnızca `name` ve `save_dir`). Kaggle Version 7, tek oturum,
+50 epoch tamamlandı (erken durma devreye girmedi).
+- Checkpoint kontrolü: optimizer MuSGD, batch 16 (yarıya inmedi), imgsz 640, `cls_pw 0.0`.
+- **Oversampling gerçekten uygulandı:** yerel veride D40 içeren train görüntüsü **2.991** → liste 21.211 + 2.991 =
+  **24.202** satır → ⌈24.202/16⌉ = **1.513** adım/epoch (e3: ⌈21.211/16⌉ = 1.326). Kaggle'ın kaydettiği son eğitim
+  görseli e3'te `train_batch53040`, e7'de `train_batch60520`: ikisi de **40 × epoch başı adım** (Ultralytics bu görseli
+  mosaic'in kapandığı epoch 41'in başında çiziyor). Sayılar birebir tutuyor.
+- results.csv'de en yüksek val mAP50 epoch 38'de (0,6088), son epoch'lar yatay (0,6085). Kaggle'ın `best.pt` doğrulaması
+  0,609 (FP16, yalnızca not; D40 0,522).
+- **Süre:** eğitim döngüsü 6 sa 7 dk (log "6.120 hours" = results.csv `time`). Epoch başına (2–50) ~432 s; e3 ~385 s
+  → ×1,12. Liste ×1,14 uzun olduğu için beklenen artış bu.
+
+**Ölçüm:** `evaluate.py` (val, imgsz 640, batch 16) ve `measure_fps.py`; tensör 640x640 doğrulandı.
+Ayrıntılı tablolar: [e7_yolo26s_d40x2_val/summary.md](../degerlendirme/e7_yolo26s_d40x2_val/summary.md).
+Asıl karşılaştırma **e3'e karşı**; e6 (diğer D40 yöntemi) ve e5 bilgi için.
+
+**Genel**
+| Model | P | R | F1 | **mAP50** | mAP50-95 |
+|---|---|---|---|---|---|
+| e3 (YOLO26s, 640) | 0,641 | 0,547 | 0,591 | 0,589 | 0,294 |
+| e6 (cls_pw 0.5, 640) | 0,635 | 0,554 | 0,592 | 0,590 | 0,296 |
+| e7 (D40 ×2, 640) | 0,646 | 0,554 | 0,596 | **0,593** | 0,294 |
+| e5 (1024, bilgi) | 0,633 | 0,578 | 0,605 | 0,609 | 0,309 |
+| e7 − e3 | +0,5 | +0,7 | +0,5 | **+0,4** | 0,0 |
+
+*Yorum:* Genel sonuç e3'e çok yakın; 1 puan sınırının altında.
+
+**Sınıf bazında (AP50; D40 için P ve R de)**
+| Sınıf | e3 | e6 | e7 | e5 | e7 − e3 |
+|---|---|---|---|---|---|
+| D00 boyuna çatlak | 0,578 | 0,580 | 0,573 | 0,604 | −0,5 |
+| D10 enine çatlak | 0,588 | 0,585 | 0,583 | 0,620 | −0,5 |
+| D20 timsah çatlağı | 0,691 | 0,693 | 0,696 | 0,697 | +0,5 |
+| **D40 çukur** | 0,500 | 0,503 | **0,520** | 0,516 | **+2,0** |
+| D40 precision | 0,631 | 0,615 | 0,590 | 0,619 | −4,1 |
+| D40 recall | 0,430 | 0,464 | **0,512** | 0,488 | **+8,2** |
+
+*Yorum:*
+- **Çukurda açık kazanç:** D40 AP50 +2,0; 640'ta, 1024'lük e5'i bile geçiyor (0,520 / 0,516).
+- e6'daki takas burada da var (recall ↑, precision ↓), ama recall artışı çok daha büyük (+8,2'ye karşı +3,4). Bu yüzden
+  e6'da AP değişmezken e7'de arttı: model çukuru 2 kat sık görünce yalnızca "çukur demeye istekli" olmadı, çukuru
+  daha çok yakaladı. 586 çukurun ~%51'i bulunuyor (e3'te ~%43), kabaca 48 çukur daha.
+- Yan etki küçük: aynı görüntülerdeki diğer sınıflar da 2 kez görüldü, D00 ve D10 yalnızca −0,5.
+
+**Ülke bazında (mAP50)**
+| Ülke | Kutu | e3 | e6 | e7 | e5 | e7 − e3 |
+|---|---|---|---|---|---|---|
+| China_MotorBike | 439 | 0,924 | 0,918 | 0,914 | 0,909 | −1,0 |
+| **ABD** | 1.083 | 0,616 | 0,593 | **0,652** | 0,649 | **+3,6** |
+| China_Drone | 308 | 0,666 | 0,670 | 0,680 | 0,688 | +1,4 |
+| Japonya | 1.582 | 0,574 | 0,570 | 0,568 | 0,579 | −0,6 |
+| Çek Cumhuriyeti | 157 | 0,426 | 0,484 | 0,484 | 0,517 | +5,8 |
+| Hindistan | 698 | 0,433 | 0,425 | 0,455 | 0,464 | +2,2 |
+| **Norveç** | 960 | 0,280 | 0,308 | **0,316** | 0,380 | **+3,6** |
+
+*Yorum:*
+- **ABD +3,6:** artış çukurdan (ABD'de D40 0,348 → 0,458, +11,0). e6'da ABD'de D40 düşmüştü (0,274); burada tersi.
+- **Norveç +3,6:** Norveç'te D40 0,116 → 0,200. 1024'ün etkisinin (+10,0) çok altında.
+- **Çek (+5,8, 157 kutu) ve China_Drone (+1,4, 308 kutu)** küçük alt kümeler; yön göstergesi olarak okunmalı.
+
+**Özel alt kümeler**
+| Alt küme | e3 | e6 | e7 | e5 | e7 − e3 |
+|---|---|---|---|---|---|
+| Drone hariç | 0,584 | 0,584 | 0,587 | 0,605 | +0,3 |
+| Japonya+Hindistan | 0,537 | 0,534 | 0,531 | 0,544 | −0,6 |
+
+*Yorum:* Japonya+Hindistan'da değişiklik yok; referansın 0,547'sine fark 1,6 puan (val'de ön karşılaştırma).
+
+**Hız (FPS, FP32, batch 1)**
+| Cihaz | e3 | e6 | e7 |
+|---|---|---|---|
+| GTX 1650 FPS | 50,5 | 51,9 | 51,8 |
+| GTX 1650 çıkarım ms | 16,3 | 16,1 | 16,1 |
+| CPU FPS | 9,9 | 11,0 | 10,9 |
+
+*Yorum:* Oversampling yalnızca eğitim verisinin sırasını/sıklığını değiştirir; mimari aynı, hız aynı.
+
+**Bu fark anlamlı mı? (1 puan kuralı, kararlar.md 2026-10-31)**
+- **e7 − e3 = +0,4 puan genel mAP50:** sınırın altında. e6'ya uygulanan ölçütle **D40 ×2 val'de kazandırmıyor.**
+- Hedef sınıfta sınırı geçiyor: **D40 +2,0** (586 kutuluk alt küme, tek seed). Raporda bulgu olarak yer alır.
+- Not: Kaggle ↔ yerel fark e7'de 1,6 puan (0,609 / 0,593); e3'te 1,1, e6'da 1,3. Resmî değer yerel ölçüm.
+
+**Final model seçimi ve birleşik model**
+- Birleşik model koşulu (1024 **ve** bir D40 yöntemi ayrı ayrı kazandırmalı, kararlar.md 2026-10-31) sağlanmadı:
+  1024 kazandırdı (+2,0), e6 (+0,1) ve e7 (+0,4) kazandırmadı. **Birleşik model yapılmadı.**
+- Maliyeti de yüksek olurdu: e5'in 12 sa 55 dk'lık eğitim döngüsü × 1,14 ≈ **14,7 sa** (13,1–15,1 sa), iki Kaggle
+  oturumu; kalan kota (10 sa 22 dk) bu haftaya yetmiyordu.
+- 1024 ile oversampling'in çukurdaki kazançları üst üste eklenir mi bilinmiyor (e5'te D40 recall zaten 0,488); bu
+  yüzden birleşik model **zaman ve kota kalırsa final teslimden önce isteğe bağlı deney / gelecek çalışma**.
+- **Final model: e5 (YOLO26s, imgsz 1024)**: val mAP50 0,609, yedi deneyin en yükseği; GTX 1650'de 25,0 FPS (15
+  hedefini tutuyor), CPU'da 4,2 FPS → GPU'suz bilgisayarda kamera için yedek model YOLO26n (e4, CPU 23,4 FPS).
+  Test setinde (Adım 9) yalnızca e5 ölçülür.
+
+**Hocaya nasıl anlatırım (e7)**
+"Çukur sınıfı için ikinci yöntem oversampling'di: çukur içeren eğitim görüntülerini listede iki kez yazdık, model her
+epoch'ta onları iki kez gördü. Bunun gerçekten uygulandığını epoch başına adım sayısından doğruladık. Genel mAP50
+0,589'dan 0,593'e çıktı; bu bizim 1 puanlık sınırımızın altında, yani genel sonuçta kazandırmıyor. Ama hedeflediğimiz
+çukur sınıfında AP 2 puan arttı: model çukurların %43'ü yerine %51'ini buluyor, karşılığında biraz daha fazla yanlış
+alarm veriyor. Sınıf ağırlığında aynı takas AP'yi değiştirmemişti; burada recall artışı çok daha büyük olduğu için AP
+de yükseldi. Kuralımıza göre birleşik modeli eğitmedik ve final model olarak 1024 piksellik YOLO26s'i seçtik; çukur
+bulgusunu raporda, birleşik modeli gelecek çalışma olarak yazıyoruz."
 
 ---
 
