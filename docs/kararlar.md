@@ -187,3 +187,21 @@ Her kayıt: tarih — karar — gerekçe.
   edip çıktıya yazar; istenen imgsz ile tutmazsa durur. Gerekçe: Ultralytics `.pt` modelde giriş boyutunu loglamıyor;
   önceki özetler yalnızca verilen argümanı tekrarlıyordu. Varsayılanlar değişmedi.
 - Ayrıntı: [adim-6-karsilastirma.md §6.5](adimlar/adim-6-karsilastirma.md), [deneyler.md](deneyler.md)
+
+## 2026-11-08 — e6 (cls_pw 0.5): val'de kazandırmıyor; birleştirme için tek aday e7
+- **Karar:** cls_pw 0.5 val'de **kazandırmıyor** (e6 − e3 = **+0,1 puan**, D40 **+0,3**). 1024 ile birleştirme için tek
+  aday **e7** (D40 ×2). **e5** (YOLO26s, imgsz 1024) şu anki en iyi aday olmaya devam ediyor.
+- **Gerekçe:** Yerel FP32 val mAP50 0,590 (e3 0,589), 1 puan kuralının çok altında. D40'ta recall 0,430 → 0,464 arttı ama
+  precision 0,631 → 0,615 düştü; AP50 0,500 → 0,503. Japonya+Hindistan 0,537 → 0,534. Tek belirgin değişim Norveç
+  0,280 → 0,308 (+2,8); ABD'de D40 düşüşüyle −2,3. FPS aynı (GTX 1650 51,9, CPU 11,0). Tek seed.
+- **Kontroller:** args.yaml'da e3'ten tek gerçek fark `cls_pw`; checkpoint'teki sınıf ağırlıkları D00 0,66 / D40 1,32
+  (oran 2,0, karekök ters frekans), yani ayar gerçekten uygulandı. Kaggle `best.pt` doğrulaması 0,603 deneyler.md'ye
+  yazıldı; results.csv'deki en yüksek 0,605 (epoch 37) not.
+- **Süre ölçüsü düzeltmesi:** baseline–e4 için yazılan süreler (ör. e3 8 sa 22 dk) Kaggle versiyonunun toplam çalışma
+  süresi; e6'nın log'u (5,085 sa) yalnızca eğitim döngüsü. Eski değerler korunur, yanlarına results.csv `time`
+  sütunundan "eğitim döngüsü" eklenir (baseline 4 sa 34 dk, e2 5 sa 55 dk, e3 7 sa 5 dk, e4 4 sa 33 dk, e5 6 sa 5 dk +
+  6 sa 50 dk = 12 sa 55 dk, e6 5 sa 5 dk); karşılaştırmada bu kullanılır. Bu ölçüyle e3/e2 ~%20 (önce %16), e5/e3 ~1,8 kat
+  (önce ~1,5). Önceki kararlar bu oranlara dayanmadığı için değişmez; eski kayıtlar olduğu gibi bırakıldı.
+- **e3 ↔ e6 süre farkı (7 sa 5 dk ↔ 5 sa 5 dk):** ~1,6 sa'i 1. epoch'tan (6.658 s ↔ 942 s; muhtemelen Kaggle'da ilk veri
+  okuması, doğrulanmadı), kalanı epoch başına ~%8 (oturum/donanım farkı; cls_pw hesap yükünü değiştirmez).
+- Ayrıntı: [adim-6-karsilastirma.md §6.6](adimlar/adim-6-karsilastirma.md), [deneyler.md](deneyler.md)

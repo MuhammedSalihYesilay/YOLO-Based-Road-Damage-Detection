@@ -151,12 +151,13 @@ Komutlar proje klasöründen (`C:\dev\yol-hasari`), PowerShell'de:
 | e3_yolo26s | 0,589 | +1,8 | 0,500 | 0,280 | 0,537 | 50,5 | En yüksek mAP50 ve D40; e2'den farkı 1 puanın altında (§6.2) |
 | e4_yolo26n | 0,560 | −1,1 | 0,458 | 0,239 | 0,509 | 61,2 | s'den ~3 puan düşük, CPU'da 23 FPS (§6.3) |
 | e5_yolo26s_1024 | 0,609 | +3,8 | 0,516 | 0,380 | 0,544 | 25,0 | e3'ten +2,0; Norveç +10,0; FPS yarıya indi; şu anki en iyi aday (§6.5) |
-| e6 (cls_pw) | | | | | | | |
+| e6_yolo26s_clspw | 0,590 | +1,9 | 0,503 | 0,308 | 0,534 | 51,9 | e3'ten +0,1: kazandırmıyor; D40 recall arttı, precision düştü (§6.6) |
 | e7 (D40 ×2) | | | | | | | |
 
 **Seçilen model:** **YOLO26s (e3)** (2026-11-02; gerekçe §6.4 ve [model-secimi.md](../model-secimi.md)).
 YOLO26n yedek kamera modeli.
 **Şu anki en iyi aday:** **e5 (YOLO26s, imgsz 1024)** (2026-11-07, §6.5). Nihai model seçimi e6 ve e7 bitince yapılacak.
+e6 (cls_pw) kazandırmadı (2026-11-08, §6.6); 1024 ile birleştirme için tek aday e7.
 
 ### 6.1 e2 YOLO11s sonuçları (val seti, yerel ölçüm, FP32)
 Eğitim ayarları baseline ile birebir aynı (`args.yaml` kontrol edildi); tek fark model: YOLOv8s yerine YOLO11s.
@@ -468,7 +469,11 @@ getiriyor (val, yerel FP32; süre `deneyler.md`'deki Kaggle runtime'ı).
 | Norveç | **0,295** | 0,265 | 0,280 | 0,239 |
 | FPS GTX 1650 (hedef 15) | 53,2 ✅ | **53,4** ✅ | 50,5 ✅ | 61,2 ✅ |
 | FPS CPU (hedef 15) | 9,5 ❌ | 10,6 ❌ | 9,9 ❌ | **23,4** ✅ |
-| Kaggle süresi (640, 50 epoch) | 4 sa 55 dk | 7 sa 11 dk | 8 sa 22 dk | 5 sa 21 dk |
+| Kaggle süresi (640, 50 epoch) | 4 sa 55 dk (eğitim döngüsü: 4 sa 34 dk, results.csv) | 7 sa 11 dk (eğitim döngüsü: 5 sa 55 dk, results.csv) | 8 sa 22 dk (eğitim döngüsü: 7 sa 5 dk, results.csv) | 5 sa 21 dk (eğitim döngüsü: 4 sa 33 dk, results.csv) |
+
+*Süre notu (2026-11-08):* İlk değerler Kaggle versiyonunun toplam çalışma süresi; parantezdeki "eğitim döngüsü"
+results.csv `time` sütunundan (yalnızca eğitim, log'daki "epochs completed" ile aynı ölçü). Karşılaştırma için eğitim
+döngüsü kullanılır ([deneyler.md](../deneyler.md)).
 
 **1. Kuralın harfiyen sonucu (kararlar.md, 2026-10-31):** s modelleri içinde mAP50'si en yüksek olan e3 (0,589).
 e2 ile farkı 0,7 puan, yani 1 puanın altında → kurala göre GTX 1650 FPS'i yüksek olan seçilir: **e2 (YOLO11s)**,
@@ -484,7 +489,8 @@ Gerekçe:
 - e3 genel mAP50'de de üç s modelinin en iyisi (fark küçük olsa da yönü aynı).
 
 **Seçimin zayıf yanları (dürüst değerlendirme):**
-- **Eğitim süresi:** e3, e2'den yaklaşık %16 daha uzun sürdü (8 sa 22 dk / 7 sa 11 dk). 1024 deneyi bu farkı büyütür
+- **Eğitim süresi:** e3, e2'den yaklaşık %16 daha uzun sürdü (8 sa 22 dk / 7 sa 11 dk; eğitim döngüsüyle ~%20:
+  7 sa 5 dk / 5 sa 55 dk). 1024 deneyi bu farkı büyütür
   ve Kaggle kotasını daha çok zorlar. Seçimdeki en somut maliyet bu.
 - **D40 ve Japonya+Hindistan alt kümeleri genelden küçük** (586 ve 2.280 kutu); farklar tek seed'le ölçüldü, bir
   kısmı oynaklık olabilir.
@@ -510,11 +516,12 @@ deneylere geçmez.
 **Eğitim:** e3 ile birebir aynı ayarlar; tek fark imgsz 640 → 1024. Eğitim Kaggle'ın 12 saatlik sınırı yüzünden
 **iki oturumda** yapıldı:
 - **Version 4:** epoch 1–26. `MAX_HOURS` sınırına gelince notebook eğitimi `last.pt` kaydedildikten sonra düzgünce
-  durdurdu (§3.2). Süre ~6 sa 5 dk (results.csv `time` sütunu; devir notunda 6,30 sa). Süre sınırıyla durduğu için
-  log'da "epochs completed" satırı yok.
+  durdurdu (§3.2). Süre 6 sa 5 dk (results.csv `time` sütunu, 21.915 s; devir notundaki 6,30 sa oturum süresi). Süre
+  sınırıyla durduğu için log'da "epochs completed" satırı yok.
 - **Version 5:** `MODE="devam"`, V4'ün output'u input olarak eklendi, `last.pt`'den resume; epoch 27–50. 50 epoch
-  normal bitti. Süre 6 sa 50 dk (log: "24 epochs completed in 6.837 hours").
-- Toplam **≈ 13 saat**; e3'ün (8 sa 22 dk) ~1,5 katı.
+  normal bitti. Süre 6 sa 50 dk (results.csv `time` 24.612 s; log'daki "24 epochs completed in 6.837 hours" ile aynı).
+- Toplam eğitim döngüsü **12 sa 55 dk (≈ 13 saat)**; aynı ölçüyle e3 7 sa 5 dk → ~1,8 katı (2026-11-08 düzeltmesi; önceki
+  "~1,5 katı" e3'ün Kaggle toplam süresiyle, 8 sa 22 dk, hesaplanmıştı).
 - `args.yaml` farkları kontrol edildi: imgsz dışındaki farklar (`optimizer: MuSGD`, `warmup_bias_lr: 0.0`, `resume`,
   `model: last.pt`) resume'dan geliyor. Resume ayarları checkpoint'ten okur; e3'ün `best.pt` checkpoint'inde de
   `MuSGD` ve `0.0` yazıyor. Batch iki koşuda da 16 (Ultralytics yarıya indirmedi). Yani tek değişken kuralı korundu.
@@ -605,7 +612,8 @@ setinde). Drone hariç sonuç genelle aynı yönde: kazanç Drone görüntüleri
   Japonya+Hindistan **+0,7** (sınırın altında, ayrılamıyor).
 - Tek seed uyarısı geçerli; ama +2,0 puan, s modelleri arasındaki farklardan (en fazla 1,8) büyük ve artış 4 sınıfın
   hepsinde, 7 ülkenin 6'sında aynı yönde.
-- **Bedeli:** eğitim ~1,5 kat uzun (≈ 13 sa, iki Kaggle oturumu), GPU FPS yarıya indi (hedef yine tutuyor).
+- **Bedeli:** eğitim ~1,8 kat uzun (eğitim döngüsü 12 sa 55 dk / 7 sa 5 dk, iki Kaggle oturumu), GPU FPS yarıya indi
+  (hedef yine tutuyor).
 - Not: Kaggle'ın değeri ile yerel ölçüm arasındaki fark e5'te 2,2 puan (0,631 / 0,609), e3'te 1,1 puandı (0,600 /
   0,589). Resmî değer yerel ölçüm olduğu için sonucu değiştirmiyor.
 
@@ -624,6 +632,104 @@ bulmasından geliyor. En büyük kazanç küçük çatlakların olduğu Norveç'
 Norveç kutularının dörtte birinin 8 pikselin altına indiğini gösteren bulgumuzu doğruluyor. Japonya'da ise neredeyse
 fark yok, çünkü o görüntüler zaten küçük. Bedeli hız: GTX 1650'de 50 FPS'ten 25'e indi, ama 15 FPS hedefinin hâlâ
 üstünde. e5'i şu an en iyi aday olarak tutuyoruz; nihai seçimi çukur sınıfı deneylerinden sonra yapacağız."
+
+### 6.6 e6 YOLO26s, sınıf ağırlığı (`cls_pw 0.5`) sonuçları (val seti, yerel ölçüm, FP32)
+> **Karar (2026-11-08):** cls_pw 0.5 val'de **kazandırmıyor** (e6 − e3 = +0,1 puan, D40 +0,3). 1024 ile birleştirme için
+> tek aday e7. e5 şu anki en iyi aday olmaya devam ediyor. Kayıt: [kararlar.md](../kararlar.md) (2026-11-08)
+
+**Eğitim:** e3 ile birebir aynı ayarlar; tek fark `cls_pw 0.0 → 0.5` (`args.yaml` karşılaştırıldı: diğer farklar yalnızca
+`name` ve `save_dir`). Kaggle Version 6, tek oturum, 50 epoch tamamlandı (erken durma devreye girmedi).
+- Checkpoint kontrolü: `cls_pw 0.5`, optimizer MuSGD, batch 16 (yarıya inmedi), imgsz 640.
+- **Ağırlık gerçekten uygulandı:** modelin içindeki sınıf ağırlıkları D00 0,66 / D10 0,98 / D20 1,04 / D40 1,32.
+  D40'ın ağırlığı D00'ın tam 2 katı: train'deki D00:D40 ≈ 4:1 oranının karekökü (§2'deki beklenti).
+- results.csv'de en yüksek val mAP50 epoch 37'de (0,605); Kaggle'ın `best.pt` doğrulaması 0,603 (FP16, yalnızca not).
+- **Süre:** eğitim döngüsü 5 sa 5 dk (log "50 epochs completed in 5.085 hours" = results.csv `time`). Aynı ölçüyle
+  e3 7 sa 5 dk. Farkın ~1,6 sa'i 1. epoch'tan (e3 6.658 s, e6 942 s; büyük olasılıkla Kaggle'da verinin ilk okunması,
+  doğrulanmadı); kalanı epoch başına ~384 s → ~354 s. cls_pw hesap yükünü değiştirmez; fark oturum/donanım kaynaklı.
+
+**Ölçüm:** `evaluate.py` (val, imgsz 640, batch 16) ve `measure_fps.py`; tensör 640x640 doğrulandı.
+Ayrıntılı tablolar: [e6_yolo26s_clspw_val/summary.md](../degerlendirme/e6_yolo26s_clspw_val/summary.md).
+Asıl karşılaştırma **e3'e karşı** (aynı imgsz); e5 yalnızca bilgi için.
+
+**Genel**
+| Model | P | R | F1 | **mAP50** | mAP50-95 |
+|---|---|---|---|---|---|
+| e3 (YOLO26s, 640) | 0,641 | 0,547 | 0,591 | 0,589 | 0,294 |
+| e6 (cls_pw 0.5, 640) | 0,635 | 0,554 | 0,592 | **0,590** | 0,296 |
+| e5 (1024, bilgi) | 0,633 | 0,578 | 0,605 | 0,609 | 0,309 |
+| e6 − e3 | −0,6 | +0,7 | +0,1 | **+0,1** | +0,2 |
+
+*Yorum:* Genel sonuç e3 ile aynı. Recall biraz arttı, precision biraz düştü; ikisi birbirini dengeledi.
+
+**Sınıf bazında (AP50)**
+| Sınıf | e3 | e6 | Fark |
+|---|---|---|---|
+| D00 boyuna çatlak | 0,578 | 0,580 | +0,2 |
+| D10 enine çatlak | 0,588 | 0,585 | −0,3 |
+| D20 timsah çatlağı | 0,691 | 0,693 | +0,2 |
+| D40 çukur | 0,500 | **0,503** | +0,3 |
+
+*Yorum:* Ağırlığın beklenen etkisi D40'ta görünüyor ama AP'ye yansımıyor: D40 **recall 0,430 → 0,464** (+3,4), precision
+**0,631 → 0,615** (−1,6). Model daha çok çukur buluyor, karşılığında daha çok yanlış alarm veriyor. AP tüm güven
+eşiklerini birlikte ölçtüğü için bu takas AP'yi değiştirmiyor. Sınıf ağırlığı, modelin çukura "daha cesur" demesini
+sağladı, ama çukuru diğer şeylerden **daha iyi ayırt etmesini** sağlamadı. Korkulan yan etki de yok: ağırlığı 0,66'ya
+düşen D00 kaybetmedi.
+
+**Ülke bazında (mAP50)**
+| Ülke | Kutu | e3 | e6 | Fark |
+|---|---|---|---|---|
+| China_MotorBike | 439 | 0,924 | 0,918 | −0,6 |
+| ABD | 1.083 | 0,616 | 0,593 | **−2,3** |
+| China_Drone | 308 | 0,666 | 0,670 | +0,4 |
+| Japonya | 1.582 | 0,574 | 0,570 | −0,4 |
+| Çek Cumhuriyeti | 157 | 0,426 | 0,484 | +5,8 |
+| Hindistan | 698 | 0,433 | 0,425 | −0,8 |
+| **Norveç** | 960 | 0,280 | **0,308** | **+2,8** |
+
+*Yorum:*
+- **Norveç +2,8:** recall 0,280 → 0,341; Norveç'te D40 0,116 → 0,144. Ağırlık, Norveç'te kaçan küçük hasarların bir kısmını
+  yakalatıyor; ama 1024'ün etkisinin (+10,0) yanında küçük.
+- **ABD −2,3:** kaybın neredeyse tamamı ABD'deki D40'tan (0,348 → 0,274, −7,4). Ülkelerdeki D40 artış ve kayıpları
+  birbirini götürdüğü için toplam D40 yalnızca +0,3.
+- **Çek (+5,8, 157 kutu)** küçük alt küme (D40 0,291 → 0,497); yön göstergesi olarak okunmalı.
+
+**Özel alt kümeler**
+| Alt küme | e3 | e6 | Fark |
+|---|---|---|---|
+| Drone hariç | 0,584 | 0,584 | 0,0 |
+| Japonya+Hindistan | 0,537 | 0,534 | −0,3 |
+
+*Yorum:* Japonya+Hindistan'da değişiklik yok; referansın 0,547'sine fark 1,3 puan (val'de ön karşılaştırma).
+
+**Hız (FPS, FP32, batch 1)**
+| Cihaz | e3 | e6 |
+|---|---|---|
+| GTX 1650 FPS | 50,5 | 51,9 |
+| GTX 1650 çıkarım ms | 16,3 | 16,1 |
+| CPU FPS | 9,9 | 11,0 |
+
+*Yorum:* Sınıf ağırlığı yalnızca eğitimdeki kaybı değiştirir; mimari aynı olduğu için hız da aynı. Aradaki küçük fark
+ölçüm oynaklığı.
+
+**Bu fark anlamlı mı? (1 puan kuralı, kararlar.md 2026-10-31)**
+- **e6 − e3 = +0,1 puan genel mAP50:** sınırın çok altında; e3'ten ayrılamıyor. **cls_pw 0.5 val'de kazandırmıyor.**
+- Hedef alt kümelerde de: D40 +0,3, Japonya+Hindistan −0,3 (ayrılamıyor). Sınırı geçen tek değişim Norveç +2,8.
+- **Birleşik model:** koşulu (ayrı ayrı kazandırma) e6 sağlamıyor; 1024 ile birleştirme için tek aday **e7** (D40 ×2).
+- e5 bilgi için: e6'dan 1,9 puan önde ve şu anki en iyi aday olarak kalıyor.
+- Not: Kaggle ↔ yerel fark e6'da 1,3 puan (0,603 / 0,590); e3'te 1,1 puandı. Resmî değer yerel ölçüm.
+
+**Sayıların anlamı (kısaca)**
+- D40 recall 0,464: val'deki 586 çukurun ~%46'sı bulunuyor (e3'te ~%43), yani kabaca 20 çukur daha.
+- D40 precision 0,615: modelin "çukur" dediklerinin ~%62'si gerçekten çukur (e3'te ~%63).
+- +0,1 puan: 0,589 → 0,590; tek seed'le ölçülen oynaklığın içinde.
+
+**Hocaya nasıl anlatırım (e6)**
+"En az örneği olan çukur sınıfı için ilk yöntem sınıf ağırlığıydı: kayıp hesabında az örnekli sınıfların hatası daha
+ağır sayılıyor. Tam ters frekans yerine karekökünü seçtik, böylece çukur boyuna çatlağın iki katı ağırlık aldı; bunun
+gerçekten uygulandığını modelin içinden doğruladık. Sonuç: genel mAP50 e3 ile aynı (0,589'a 0,590). Çukurda model daha
+fazla çukur buldu, recall 3,4 puan arttı, ama daha çok yanlış alarm da verdi; ikisi birbirini dengeledi ve AP neredeyse
+değişmedi. Yani ağırlık, modeli çukur demeye daha istekli yaptı ama çukuru daha iyi tanımasını sağlamadı. Bu yüzden
+bu ayarı 1024 ile birleştirmiyoruz; ikinci yöntem olan çukurlu görüntüleri iki kez göstermenin sonucunu bekliyoruz."
 
 ---
 

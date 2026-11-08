@@ -41,7 +41,11 @@ Dört modelde **yalnızca model değişti**; geri kalan her şey aynıydı:
 | Norveç mAP50 | **0,295** | 0,265 | 0,280 | 0,239 |
 | FPS GTX 1650 (hedef ≥ 15) | 53,2 | 53,4 | 50,5 | **61,2** |
 | FPS CPU (hedef ≥ 15) | 9,5 | 10,6 | 9,9 | **23,4** |
-| Kaggle eğitim süresi | 4 sa 55 dk | 7 sa 11 dk | 8 sa 22 dk | 5 sa 21 dk |
+| Kaggle eğitim süresi | 4 sa 55 dk (eğitim döngüsü: 4 sa 34 dk, results.csv) | 7 sa 11 dk (eğitim döngüsü: 5 sa 55 dk, results.csv) | 8 sa 22 dk (eğitim döngüsü: 7 sa 5 dk, results.csv) | 5 sa 21 dk (eğitim döngüsü: 4 sa 33 dk, results.csv) |
+
+*Süre notu (2026-11-08):* İlk değerler Kaggle versiyonunun toplam çalışma süresi (kurulum, son doğrulama, zip dahil);
+parantezdeki "eğitim döngüsü" results.csv `time` sütunundan, yalnızca eğitim. Karşılaştırma için eğitim döngüsü
+kullanılır. Ayrıntı: [deneyler.md](deneyler.md).
 
 Okuma ipucu: "1 puan" = mAP'de 0,01. Örneğin 0,589 − 0,582 = 0,7 puan.
 
@@ -64,7 +68,7 @@ durumda hıza bakıyor: YOLO11s 53,4 FPS, YOLO26s 50,5 FPS → YOLO11s.
    İlk ikisi 1 puan sınırının üstünde.
 3. Genel mAP50'de de YOLO26s en iyisi; fark küçük ama yönü aynı.
 
-**Bedeli:** YOLO26s'in eğitimi YOLO11s'ten ~%16 daha uzun sürdü (8 sa 22 dk / 7 sa 11 dk). 1024 deneyinde bu fark
+**Bedeli:** YOLO26s'in eğitimi YOLO11s'ten ~%16 daha uzun sürdü (8 sa 22 dk / 7 sa 11 dk; eğitim döngüsüyle ~%20: 7 sa 5 dk / 5 sa 55 dk, results.csv). 1024 deneyinde bu fark
 büyüyecek ve Kaggle kotasını daha çok zorlayacak. Kuraldan sapma ve gerekçesi kararlar.md'ye açıkça yazıldı.
 
 ## 5. YOLO26n'in rolü: yedek kamera modeli
