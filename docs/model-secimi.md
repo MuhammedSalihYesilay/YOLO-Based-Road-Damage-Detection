@@ -174,6 +174,6 @@ Kullandığımız Ultralytics sürümünde NMS'siz mod isteğe bağlı, varsayı
 asıl belirleyen sinir ağının hesabı, NMS değil.
 
 **4. "Neden daha büyük bir model (m, l) denemediniz?"**
-Kaggle'ın haftalık 30 saatlik GPU kotası ve GTX 1650'nin hızı sınırlı. Literatürde RDD2022'de m modelinin s'ye üstünlüğü
+Kaggle'ın haftalık 30 saatlik GPU kotası ve GTX 1650'nin hızı sınırlı. Bir topluluk sonucuna göre (Hugging Face model kartı, hakemsiz) RDD2022'de m modelinin s'ye üstünlüğü
 ~0,6 puan; bizde de n → s farkı (2,9 puan) nesiller arası farktan büyük çıktı, ama s → m'nin kazancı küçük bekleniyor.
 Kalan kotayı Norveç (1024) ve çukur (D40) gibi bilinen zayıflıklara ayırmayı daha verimli bulduk.

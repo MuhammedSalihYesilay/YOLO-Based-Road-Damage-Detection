@@ -37,7 +37,7 @@ Ayrıntı: [adim-6-karsilastirma.md §6.2](../adimlar/adim-6-karsilastirma.md).
   - Sınıf bazında (YOLO26s): pothole 74,5, alligator 62,1, longitudinal 54,7, transverse 53,8.
   - Model kartı ayrıca büyük kareler 640'a küçültülünce ince çatlakların kaybolduğunu not ediyor.
   - Kaynak: [HF model kartı](https://huggingface.co/dronefreak/rdd2022-yolo26s)
-- **Çatlak veri seti (MDPI Sensors 2026):** mAP50 YOLO26s %89,0, YOLO11s %88,6, YOLOv8s yaklaşık %88,1. Fark yaklaşık 1 puan. Kaynak: [doi:10.3390/s26165113](https://doi.org/10.3390/s26165113)
+- **Çatlak veri seti (MDPI Sensors 2026):** mAP50 YOLO26s %89,0, YOLO11s %88,6, YOLOv8s yaklaşık %88,1. Fark yaklaşık 1 puan. Kaynak: [doi:10.3390/s26165113](https://doi.org/10.3390/s26165113) **(doğrulanamadı: sayfa 403; raporda kaynak olarak kullanılmayacak)**
 - **Sonuç:** Yol hasarında yeni sürümlerin kazancı 1 puanı geçmiyor, bazen hiç yok. Bu yüzden karşılaştırmayı kendi verimizde yapmak raporda anlamlı bir bulgu olacak.
 
 ## Seçilen modeller ve gerekçeleri
@@ -49,7 +49,7 @@ Ayrıntı: [adim-6-karsilastirma.md §6.2](../adimlar/adim-6-karsilastirma.md).
 | **YOLO26n** | Gerçek zamanlı kamera için en küçük ve en hızlı model. "s yerine n kullanınca ne kadar doğruluk kaybediyoruz?" sorusunu da cevaplar. |
 
 **Dahil edilmeyenler:**
-- **m/l/x:** Kaggle süresi ve GTX 1650 hızı açısından pahalı. RDD2022'de m'nin s'ye üstünlüğü yaklaşık 0,6 puan.
+- **m/l/x:** Kaggle süresi ve GTX 1650 hızı açısından pahalı. Bir topluluk sonucuna göre (Hugging Face model kartı, hakemsiz) RDD2022'de m'nin s'ye üstünlüğü yaklaşık 0,6 puan.
 - **YOLOv8n, YOLO11n:** Zaman kalırsa eklenir; n tarafında tek model (YOLO26n) yeterli.
 
 ## Eğitim süresi ve bütçe

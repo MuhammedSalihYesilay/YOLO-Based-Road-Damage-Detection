@@ -224,3 +224,28 @@ Her kayıt: tarih — karar — gerekçe.
   deneyler.md'ye yazıldı (özet satırıyla aynı).
 - Ayrıntı: [adim-6-karsilastirma.md §6.7](adimlar/adim-6-karsilastirma.md), [model-secimi.md](model-secimi.md),
   [deneyler.md](deneyler.md)
+
+## 2026-11-10 — Literatür taraması düzeltmeleri; raporda yalnızca hakemli / birincil kaynak
+- **Karar (literatür metni, `docs/rapor/literatur-taramasi.md` + `ozel/` kopyası):**
+  - [5] CRDDC'2022: "More than 60 teams" → **70**. Kaynakçada IEEE sürümü gösteriliyor; IEEE özeti 70, arXiv özeti 60 diyor.
+  - [16] Pham vd.: kaynakça arXiv ön baskısından **IEEE Big Data 2022 sürümüne** çevrildi (pp. 6416–6423,
+    doi 10.1109/BigData55660.2022.10020856, künye Crossref). "51 teams" → **54 teams** (IEEE gövdesi; arXiv gövdesi 51);
+    Google Street View ile veri toplama önerisi eklendi.
+  - [7] Faster R-CNN 5 fps'in VGG-16 modeline ait olduğu yazıldı; [9] YOLO'nun daha çok konum hatası / daha az yanlış
+    alarm yaptığı eklendi; [14] YOLO26 Progressive Loss eklendi ve tüm ölçümlerin varsayılan one-to-many (NMS'li) başla
+    yapıldığı belirtildi; [17] SEA-YOLO v8'in değişiklikleri (SBS, EMA, uyarlanabilir dikkat FPN, LSCD-Head) eklendi
+    (SBS için kaynaktaki "optimize" ifadesi kullanıldı); [18] "five model scales" netleştirildi.
+  - §5: dört sınıfın RDD benchmark'larından geldiği, `other corruption`'ın (white line blur, crosswalk blur) neden
+    atıldığı netleştirildi; final model (YOLO26s, 1024, val mAP50 0,609, GTX 1650'de ~25 FPS) eklendi.
+  - LIT bloğu 11.216 karakter (şablon ≥ 8000).
+- **Gerekçe:** Her madde birincil kaynaktan (arXiv özeti, Crossref, Semantic Scholar'daki IEEE özeti, PLOS sayfası)
+  bağımsız doğrulandı; [5] ve [16]'nın IEEE değerleri kullanıcı tarafından IEEE sayfasında elle doğrulandı. Kaynakçada
+  hangi sürüm gösteriliyorsa sayılar o sürümden alınmalı. Doğrulanamayan iddialar (ör. YOLO26-RD'nin görüntü sayısı ve
+  sınıfları) metne konmadı. SEA-YOLO'nun Data Availability kısmı "RDD2020" yazıyor ama RDD2022 sitesine bağlanıyor;
+  metinde özete (RDD2022) uyuldu, not kontrol tablosunda.
+- **Kural:** Raporda kaynak olarak yalnızca hakemli ya da birincil kaynaklar (makale, resmi belge, veri setinin kendi
+  yayını) kullanılır. Hugging Face model kartı gibi topluluk sonuçları ve doğrulanamayan (403 veren) kaynaklar
+  araştırma notlarında kalabilir ama açıkça işaretlenir: `model-secimi.md` §8 S4 ve `arastirma/yolo-modelleri.md`'deki
+  "m'nin s'ye üstünlüğü ~0,6 puan" ifadesi "bir topluluk sonucu (Hugging Face model kartı, hakemsiz)" olarak düzeltildi;
+  yolo-modelleri.md'deki MDPI Sensors 2026 sonucu "doğrulanamadı, raporda kaynak olarak kullanılmayacak" diye işaretlendi.
+- Ayrıntı: [rapor/literatur-taramasi.md](rapor/literatur-taramasi.md) (Kaynak Kontrol Tablosu, "Dikkat edilecek" 3. madde)
