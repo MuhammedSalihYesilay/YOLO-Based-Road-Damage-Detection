@@ -249,3 +249,27 @@ Her kayıt: tarih — karar — gerekçe.
   "m'nin s'ye üstünlüğü ~0,6 puan" ifadesi "bir topluluk sonucu (Hugging Face model kartı, hakemsiz)" olarak düzeltildi;
   yolo-modelleri.md'deki MDPI Sensors 2026 sonucu "doğrulanamadı, raporda kaynak olarak kullanılmayacak" diye işaretlendi.
 - Ayrıntı: [rapor/literatur-taramasi.md](rapor/literatur-taramasi.md) (Kaynak Kontrol Tablosu, "Dikkat edilecek" 3. madde)
+
+## 2026-11-10 — Literatür taraması sadeleştirildi (son düzenleme)
+- **Karar:** LIT metni (`docs/rapor/literatur-taramasi.md` + `ozel/` kopyası) sadeleştirildi:
+  - Kaynak özetlerine çok yakın cümleler (özellikle §1 veri setleri, §2 R-CNN / Faster R-CNN / SSD / YOLO tanımları)
+    kendi cümlelerimizle, farklı yapıyla yeniden yazıldı; anlam ve sayılar aynı. [17]'deki SBS ifadesi de kendi
+    cümlemizle yazıldı ("reduces computational cost").
+  - §2'deki gereksiz ayrıntılar çıkarıldı: YOLOv8/YOLO11 çıkış tarihleri, COCO mAP ve parametre sayıları, 45/155 FPS,
+    VGG-16 5 fps, %43 CPU, COCO'nun örnek/görüntü sayısı ve YOLOv8'in "resmi makalesi yok" cümlesi. [10] COCO metinde kaldı.
+  - Tüm "(this study)" ekleri kaldırıldı; kendi bilgilerimiz "this project" / "our experiments" ile ayrılıyor.
+  - §4: 0,547'nin hakemsiz bir GitHub deposundaki PR eğrisi görselinden alındığı ve hangi bölmede ölçüldüğünün
+    belirtilmediği yazıldı; değer yalnızca yaklaşık karşılaştırma noktası.
+  - §1, §2, §3 sonuna önceki paragraflardan çıkan birer sentez cümlesi eklendi (yeni iddia yok).
+  - §5 kısaltıldı: bölme sayıları ve ara sonuçlar (0,589 / 0,582 / 0,571, 15 FPS hedefi) çıktı; üç sürümün aynı
+    koşullarda karşılaştırılması, hız ölçümü ve final model (YOLO26s, 1024, val mAP50 0,609, ~25 FPS) tek cümlede.
+    "Diğer çalışmalar yalnızca doğruluk raporluyor" iddiası "karşılaştırmalar ağırlıklı olarak doğruluğa dayanıyor"
+    diye yumuşatıldı.
+  - LIT bloğu 11.220 → **10.012 karakter** (şablon ≥ 8000). Yeni kaynak yok; [1]–[19]'un hepsi metinde geçiyor.
+- **Gerekçe:** (1) Özetlere yakın cümleler benzerlik/intihal denetiminde sorun çıkarabilir. (2) Literatür bölümünde
+  model tanıtımının sayısal ayrıntısı gereksiz; bu bilgiler Kaynak Kontrol Tablosu'nda ve araştırma notlarında duruyor.
+  (3) Referans değerin (0,547) zayıf kaynağını açıkça yazmak, hedefin "yaklaşık" olduğunu dürüstçe gösterir.
+  (4) Sentez cümleleri literatürü yalnızca özetlemek yerine bizim çalışmamıza bağlıyor. (5) "Yalnızca doğruluk"
+  iddiası tüm kaynaklar için kanıtlanmadığı için yumuşatıldı.
+- Metinden çıkan alıntılar Kaynak Kontrol Tablosu'nda kayıt olarak duruyor (tablonun üstünde not var). Türkçe çeviri
+  (`ozel/literatur-taramasi-turkce.md`, git dışı) yeni metne göre güncellendi.
