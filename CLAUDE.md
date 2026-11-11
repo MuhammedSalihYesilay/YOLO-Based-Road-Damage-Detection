@@ -57,7 +57,8 @@ GPS eşleştirme → veritabanına kayıt → harita gösterimi → aynı hasar�
     etiketsiz; sadece görsel demo için kullanılabilir.
   - Etiketli verinin tamamı kullanılacak
   - Çin Drone görüntüleri de eğitime dahil edilecek (dikkatli ele alınacak)
-  - Lisans: CC BY-SA 4.0. Kaynak/atıf: Arya, Maeda, Sekimoto vd., "RDD2022: A multi-national
+  - Lisans: kaynaklar çelişiyor: figshare kaydı (DOI 10.6084/m9.figshare.21431547) CC BY 4.0, GitHub README'si
+    CC BY-SA 4.0; daha katı olana (CC BY-SA 4.0) uyuyoruz (kararlar.md 2026-11-11). Kaynak/atıf: Arya, Maeda, Sekimoto vd., "RDD2022: A multi-national
     image dataset for automatic Road Damage Detection", 2022, arXiv:2209.08538
 - Veri bölme: resmi test seti etiketsiz olduğu için etiketli train verisi
   %80 train / %10 val / %10 test olarak ayrılacak, seed 42, ülke + boş/dolu katmanlı;

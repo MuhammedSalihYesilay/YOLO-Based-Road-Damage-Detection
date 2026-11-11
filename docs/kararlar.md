@@ -302,3 +302,25 @@ Her kayıt: tarih — karar — gerekçe.
   25010 kullanıcı tarafından iso.org'da elle). RDD2022 PDF'inde ASTM/PCI hiç geçmiyor; ASTM'nin resmî sayfasında hasar
   türü listesi yok, bu yüzden adlarıyla eşleme yazılmadı. Testler final döneminde yapılacağı için şimdiki zaman kullanılmadı.
 - Ayrıntı: [rapor/standartlar.md](rapor/standartlar.md) (Kaynak Kontrol Tablosu; git dışı kopyası ve Türkçe açıklaması `rapor/ozel/` altında)
+
+## 2026-11-11 — Ara rapor: Legal Consequences; kodun lisansı AGPL-3.0 ile uyumlu seçilecek
+- **Karar:** Legal metni dört konu: veri seti lisansı (CC BY 4.0 / CC BY-SA 4.0 çelişkisi, aşağıda), yazılım lisansları (Ultralytics AGPL-3.0, lisanssız
+  referans proje), kişisel veri (KVKK 6698, GDPR), sorumluluk (karar destek aracı, son karar insanda: kaynaksız, kendi
+  tasarım kararımız). Hukuki yorum yok; yalnız kaynağın dediği ve bizim yaptığımız / yapacağımız. AB Yapay Zekâ Yasası
+  ve diğer kütüphane lisansları çıkarıldı. Metin 1.421 kr.; kaynaklar geçici olarak [29]–[37].
+- **Kodun lisansı:** Repoda LICENSE dosyası yok. Ultralytics AGPL-3.0 olduğu için kodumuzun lisansı **AGPL-3.0 ile uyumlu**
+  seçilecek; dosya şimdi eklenmedi (ne zaman ve hangi lisans: ekip kararı).
+- **Kaggle:** YOLO formatlı kopya private yüklendi, herkese açık değil; metinde yalnız bu olgu, hukuki yorum yok.
+- **Bulanıklaştırma iddiası çıkarıldı:** "Yüz ve plakalar bulanıklaştırılmış" cümlesi yalnız sekilab README'sinin genel
+  "Privacy matters" bölümünde (2018 veri seti bölümünden sonra); RDD2022 makalesinde yok, RDD2022'yi kapsadığı
+  doğrulanamadı. GDPR cümlesi somut olguyla: "part of the images was collected in the Czech Republic".
+- **Veri seti lisansı çelişkisi:** RDD2022'nin figshare kaydı (DOI 10.6084/m9.figshare.21431547; kullanıcı elle baktı,
+  DataCite kaydı da "Creative Commons Attribution 4.0 International") **CC BY 4.0** diyor; veri setinin GitHub
+  deposundaki README (sekilab/RoadDamageDetector, "# License", genel başlık) **CC BY-SA 4.0** diyor. Metinde ikisi de
+  yazıldı; **daha katı koşullara (CC BY-SA) uyuyoruz:** atıf veriyoruz, uyarlanmış veriyi paylaşırsak aynı lisansla.
+  Hangisinin bağlayıcı olduğuna dair hukuki yorum yok. Kaynaklar [36] figshare kaydı, [37] CC BY 4.0 legal code.
+  CLAUDE.md, README.md ve plan.md (§2.7, §A) kullanıcı onayıyla bu çelişkiyi gösterecek şekilde güncellendi.
+- **Gerekçe:** Lisans ve tanımlar resmî metinlerden doğrulandı (CC legalcode, sekilab/RoadDamageDetector README, gnu.org
+  AGPL §13, ultralytics.com/license, GitHub Docs, mevzuat.gov.tr 6698 PDF). GDPR'ın madde metni EUR-Lex'ten okunamadı;
+  yalnız AB Yayın Ofisi'ndeki resmî başlık kullanıldı, tanım metne konmadı. Kamera modu henüz yok → gelecek zaman.
+- Ayrıntı: [rapor/yasal.md](rapor/yasal.md) (Kaynak Kontrol Tablosu; git dışı kopyası ve Türkçe açıklaması `rapor/ozel/` altında)

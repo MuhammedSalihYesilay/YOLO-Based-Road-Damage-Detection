@@ -40,7 +40,7 @@ Bu plan v1'in yerini alıyor; v1'deki veri seti bulguları (A bölümü) korunuy
    - **Tekrarlanabilirlik:** sabit seed, `requirements.txt` sürümleri sabit, veri bölme listesi dosyaya kaydedilir.
    - **Ekip içi görev dağılımı:** 2 kişi paralel çalışabilir (biri model, biri arayüz) → §7 sonu.
    - **Git/GitHub iş akışı:** uzak depo; `data/` ve ağırlık dosyaları (`*.pt`) git dışında; ağırlıklar GitHub Releases'ta saklanır (kararlar.md, 2026-10-18).
-   - **Lisans ve atıf:** RDD2022 CC BY-SA 4.0, atıf zorunlu. Referans projede LICENSE dosyası yok; kodunu kopyalamayıp inceleyerek kendimiz yazacağız ve raporda atıf vereceğiz.
+   - **Lisans ve atıf:** RDD2022 CC BY-SA 4.0, atıf zorunlu (kaynaklar çelişiyor: figshare kaydı CC BY 4.0, GitHub README'si CC BY-SA 4.0; daha katı olan CC BY-SA 4.0'a uyuyoruz, kararlar.md 2026-11-11). Referans projede LICENSE dosyası yok; kodunu kopyalamayıp inceleyerek kendimiz yazacağız ve raporda atıf vereceğiz.
    - **Risk planı:** eğitim süresi, Kaggle kotası, tarayıcı kamera izinleri (webrtc), sunumda internet olmaması → yedek demo videosu.
    - **Referans uygulamadaki bir hata:** görüntüyü elle 640x640'a `cv2.resize` ediyor, bu en-boy oranını bozuyor. Biz Ultralytics'in kendi `imgsz` ön işlemesini kullanacağız.
 
@@ -108,7 +108,7 @@ Kaynak: tüm ann JSON'ları sayıldı (38.385 train + 9.035 test), görüntü bo
 | 15 | Japonya/Çek 600x600 | Site eksik (madde 6) | Veriye güveniyoruz. |
 | 16 | Ülke sayıları | Site sayıları train+test toplamı, bizimkiyle birebir tutuyor | Çelişki yok. |
 
-Sitede tutanlar: toplamlar (47.420 görüntü, 61.082 etiket, 12,86 GB), sınıf etiket sayıları, etiketsiz 21.693 görüntü (= 12.658 boş train + 9.035 test), lisans CC BY-SA 4.0, kaynak Arya vd. 2022 (arXiv:2209.08538). Sitedeki "55.000'den fazla nesne", bizim 4 sınıfın toplamıyla (55.232) uyumlu.
+Sitede tutanlar: toplamlar (47.420 görüntü, 61.082 etiket, 12,86 GB), sınıf etiket sayıları, etiketsiz 21.693 görüntü (= 12.658 boş train + 9.035 test), lisans CC BY-SA 4.0 (figshare: CC BY 4.0, bkz. kararlar.md 2026-11-11), kaynak Arya vd. 2022 (arXiv:2209.08538). Sitedeki "55.000'den fazla nesne", bizim 4 sınıfın toplamıyla (55.232) uyumlu.
 
 ---
 

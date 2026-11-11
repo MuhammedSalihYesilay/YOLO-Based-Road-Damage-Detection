@@ -15,5 +15,5 @@ Streamlit web arayüzünde görüntü, video ya da kamera girdisi verilir; tespi
 Veri seti ve referans proje boyut ve lisans nedeniyle repoya konmadı (`.gitignore`). Ayrıca indirilmeleri gerekir:
 
 - **Veri seti (RDD2022, ~12,9 GB):** https://datasetninja.com/road-damage-detector/ adresinden Supervisely formatında indirilip `data/rdd2022/` altına açılır.
-  Lisans CC BY-SA 4.0. Atıf: Arya, Maeda, Sekimoto vd., "RDD2022: A multi-national image dataset for automatic Road Damage Detection", 2022, [arXiv:2209.08538](https://arxiv.org/abs/2209.08538).
+  Lisans: figshare kaydı CC BY 4.0, veri setinin GitHub deposu CC BY-SA 4.0; bu projede daha katı olan CC BY-SA 4.0 koşullarına uyuluyor. Atıf: Arya, Maeda, Sekimoto vd., "RDD2022: A multi-national image dataset for automatic Road Damage Detection", 2022, [arXiv:2209.08538](https://arxiv.org/abs/2209.08538).
 - **Referans proje (RoadDamageDetection):** https://github.com/oracl4/RoadDamageDetection adresinden indirilip `reference/RoadDamageDetection-main/` altına açılır. Sadece incelemek için kullanılıyor; LICENSE dosyası olmadığından kodu kopyalanmaz.
