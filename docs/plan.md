@@ -32,7 +32,7 @@ Bu plan v1'in yerini alıyor; v1'deki veri seti bulguları (A bölümü) korunuy
 3. Eğitim ortamı (yerel GTX 1650 4 GB yetmez) → §5
 4. Streamlit arayüzü ve gerçek zamanlı kamera adımları → §6, Adım 7-8
 5. Rapor ve sunum hazırlığı → Adım 10
-6. Haftalık zaman çizelgesi → §8
+6. İş sırası (vizeye kadar / vizeden sonra) → §8
 7. **Ek olarak bulunan eksikler:**
    - **Test setinin tek kullanımı:** test parçası sadece en sonda, seçilen model için bir kez kullanılır. Model seçimi val üzerinden yapılır; aksi halde sonuç "kopya" sayılır.
    - **Adil karşılaştırma:** referansın 0,547'si kendi Japonya+Hindistan val bölmesinde ölçülmüş. Bizim modeli test setimizin Japonya+Hindistan alt kümesinde ayrıca ölçüp raporlanan 0,547 ile karşılaştıracağız. Referansın hazır modelini bizim test setimizde ölçmeyeceğiz (veri sızıntısı, bkz. Doğrulama).
@@ -118,7 +118,7 @@ Sitede tutanlar: toplamlar (47.420 görüntü, 61.082 etiket, 12,86 GB), sınıf
 ~~git init + GitHub deposu, `.gitignore` (data/, reference/, venv/, runs/, *.pt, *.onnx, __pycache__/, kaggle.json)~~ ✅ 2026-10-15. (`docs/kararlar.md`, `docs/proje-onerisi.md` ve CLAUDE.md düzeltmeleri 2026-10-15'te yapıldı.)
 - ✅ 2026-10-18: Hakan (hakan0363) collaborator daveti kabul etti; NVIDIA sürücüsü 617.42 (CUDA 13.4'e kadar); Kaggle hesabı hazır (telefon doğrulandı; GPU 30 sa/hafta, private dataset 214,75 GB); disk 72,9 GB boş
 - ✅ 2026-10-18: python.org Python 3.13.16 + `venv/`; torch 2.14.1+cu130, ultralytics 8.4.182, opencv, pandas, matplotlib; `requirements.txt` (cu130 dahil); `torch.cuda.is_available()` = True; hazır model yeni ultralytics'te açıldı ve tahmin üretti, ONNX'e gerek yok (kararlar.md)
-- Kalan: Kaggle GPU deneme notebook'u
+- ✅ Kaggle GPU denemesi Adım 4'te yapıldı (deneme + resume testi)
 - *Ne öğreneceğim:* venv neden gerekli, git commit/push/branch, iki kişiyle çakışmadan çalışma.
 - *Hocaya:* "Proje sürüm kontrollü ve tekrar kurulabilir; büyük veri ve model dosyaları depoya girmiyor."
 
@@ -151,15 +151,12 @@ Görüntü açmaz; sadece `ann/*.json` okunur, boyutlar JSON'daki `size` alanın
 - ✅ Smoke test (`make_smoke_lists.py`: 2.000 train / 400 val, katmanlı): YOLOv8n, 640, 3 epoch, batch 8 → hatasız; ~55 sn/epoch, GPU 2,03 GB; loss'lar düşüyor (cls 5,46→2,99), val mAP50 0,04→0,12. GTX 1650'de Ultralytics AMP'yi kendisi kapattı (NaN yok). Not: `project=runs/smoke` çıktısı `runs/detect/runs/smoke/` altına düştü.
 - *Ne öğrendim:* YOLO etiket formatı (sınıf cx cy w h, 0-1 oran → küçültme etiketi bozmaz), katmanlı bölme ve seed, hardlink (kopyasız ikinci isim), txt listeleriyle veri seti tanımlama, pandas'ta `df.empty` gibi hazır özellik isimleriyle sütun adlandırma tuzağı.
 - *Hocaya:* "38 bin etiketli görüntüyü YOLO formatına çevirdik ve ülke + boş/dolu oranı korunarak %80/10/10 böldük; her parçada sınıf oranları en fazla 1 puan farklı. 20 örneği çizip kontrol ettik, küçük bir deneme eğitimiyle hattın uçtan uca çalıştığını gösterdik."
-- *Ne öğreneceğim:* YOLO etiket formatı (sınıf cx cy w h, normalize), stratified split, seed.
-- *Hocaya:* "Etiketleri modelin anladığı formata çevirdik; %80/10/10 böldük, ülke dağılımı her parçada aynı. 20 rastgele örneği çizip doğruladık."
 
 **Adım 4: Baseline eğitim** ✅ (önce yerelde YOLOv8n ile kısa deneme, sonra Kaggle'da referans ayarları: v8s, 640) ([ayrıntı](adimlar/adim-4-baseline-egitim.md))
 - **Checkpoint ile devam:** Kaggle oturumu en fazla 12 saat sürüyor. Eğitim her epoch sonunda `last.pt` kaydeder (ayrıca `save_period` ile ara kayıtlar alınır). Çıktı klasörü oturum bitmeden Kaggle "output/dataset" olarak saklanır. Yeni oturumda `YOLO("last.pt").train(resume=True)` ile kaldığı epoch'tan devam edilir. İlk denemede bilerek yarıda kesip devam ettirerek bu akış test edilir. Referans projedeki "Resume Training" hücresi örnek alınır (`reference/.../training/1_TrainingYOLOv8.ipynb`).
 - ✅ 2026-10-28: zip + notebook hazır (`src/kaggle/pack_dataset.py` → `data/kaggle_upload/rdd2022_yolo.zip`, `notebooks/train_baseline.ipynb`). Sırada: Kaggle'a yükleme, deneme + resume testi, epoch süresi ([ayrıntı](adimlar/adim-4-baseline-egitim.md))
 - ✅ 2026-10-29: Kaggle'da deneme + resume testi başarılı (1. epoch sonrası durdurulup `last.pt`'den devam edildi). Asıl eğitim: YOLOv8s, 640, 50 epoch, T4'te 4 sa 55 dk; early stopping devreye girmedi, son 5 epoch yatay. **val mAP50 0,589**, mAP50-95 0,304; en zayıf D40 (0,482), en iyi D20 (0,695). Epoch ~4,5 dk (ilk epoch ~25 dk, ilk okuma yavaş). `best.pt` yerelde `runs/kaggle/baseline_v8s/`. Test setine bakılmadı (Adım 9). Not: bunlar Kaggle'ın eğitim sonu değerleri; resmî değer yerel ölçüm, val mAP50 0,571 (Adım 5).
 - *Ne öğrendim:* transfer learning, checkpoint/resume, loss ve mAP eğrisinin doyması (son epoch'larda yatay), ilk okuma önbelleğinin epoch süresine etkisi, val sonucu ile test sonucunun farkı.
-- *Ne öğreneceğim:* epoch, batch, öğrenme oranı, transfer learning (COCO ön-eğitimli ağırlıklar), loss eğrilerini okumak, overfitting, checkpoint/resume mantığı.
 - *Hocaya:* "Sıfırdan değil, önceden eğitilmiş bir modeli kendi verimize uyarladık (transfer learning). Bu baseline'ımız."
 
 **Adım 5: Değerlendirme script'i** ✅ — `src/eval/`: val metrikleri (test Adım 9'da), ülke ve sınıf kırılımı, Japonya+Hindistan alt kümesi, FPS ölçümü → `docs/deneyler.md` ([ayrıntı](adimlar/adim-5-degerlendirme.md))
@@ -170,56 +167,65 @@ Görüntü açmaz; sadece `ann/*.json` okunur, boyutlar JSON'daki `size` alanın
 - *Ne öğrendim:* IoU eşiği, TP/FP, precision/recall/F1, mAP50 ile mAP50-95 farkı, confusion matrix okuma, alt küme mAP'sinin ayrı hesaplanması, FPS ölçümünde ısınma ve GPU senkronizasyonu, aynı modelin farklı ortam/hassasiyette farklı sonuç verebilmesi.
 - *Hocaya:* "mAP50, tahmin kutusu gerçek kutuyla en az %50 örtüşünce doğru sayılan ortalama kesinlik. Modeli sınıf ve ülke bazında ölçtük; en zayıf yer Norveç ve çukur sınıfı. Japonya+Hindistan'da val'de 0,522 aldık; referansın 0,547'siyle kesin karşılaştırmayı test setinde yapacağız. GTX 1650'de 53 FPS, gerçek zamanlı hedefin üç katı."
 
-**Adım 6: Karşılaştırma deneyleri** (val üzerinde) ([ayrıntı](adimlar/adim-6-karsilastirma.md))
+**Adım 6: Karşılaştırma deneyleri** ✅ (val üzerinde) ([ayrıntı](adimlar/adim-6-karsilastirma.md), [model seçimi](model-secimi.md))
+- ✅ Final model **e5 (YOLO26s, imgsz 1024; val mAP50 0,609, GTX 1650'de 25 FPS)**; YOLO26n (e4) yedek kamera modeli. Birleşik model (1024 + D40 ×2) yapılmadı: isteğe bağlı / gelecek çalışma (kararlar.md 2026-11-08).
 - ✅ 2026-10-31: deney planı + tek parametreli notebook (`notebooks/train_experiment.ipynb`; ayar hücresi, `MODE` = deneme/egitim/devam, `MAX_HOURS` süre sınırıyla düzgün durdurma). Eğitimler Kaggle'da başlatılacak.
 - Sıra: (2) YOLO11s → (3) YOLO26s → (4) YOLO26n → **model seçimi** (val mAP50; fark < 1 puansa FPS) → seçilen modelle (5) imgsz 1024 → (6) D40 sınıf ağırlığı `cls_pw 0.5` → (7) D40 oversampling ×2 → (8) koşullu birleşik (1024 + iyi olan D40 yöntemi). Zaman kalırsa mosaic kapalı (referans gibi).
 - Ortak ayarlar baseline ile aynı (kararlar.md 2026-10-29); her deney tek değişken. Her deney sonrası yerelde `evaluate.py` + `measure_fps.py` → `docs/deneyler.md`.
 - *Ne öğreneceğim:* model boyutu ile hız ve doğruluk ilişkisi, augmentation türleri, dengesiz veriyle başa çıkma.
 - *Hocaya:* "Aynı veriyle, tek bir değişkeni değiştirerek karşılaştırdık; tablo ve grafik burada. En iyisini val'e göre seçtik, test'e en son bir kez baktık."
 
-**Adım 7: Streamlit arayüzü** — `src/app/`: Home, Görüntü, Video sayfaları; güven eşiği kaydırıcısı; sonuç indirme. Bizim model hazır olana kadar referansın hazır modeliyle test edilir.
+**Adım 7: Streamlit arayüzü** — `src/app/`
+- **7a (vizeye kadar):** yalnız Görüntü sayfası prototipi: fotoğraf yükleme, e5 ile tespit (FP32 `half=False`, `imgsz=1024`; kararlar.md 2026-10-30), kutu + sınıf + güven skoru, güven eşiği kaydırıcısı. Model yerelden: `runs/kaggle/e5_yolo26s_1024/weights/best.pt`. `requirements.txt`'e streamlit eklenir.
+- **7b (vizeden sonra):** Home, Video sayfası, sonuç indirme.
 - *Ne öğreneceğim:* Streamlit sayfa yapısı, model önbellekleme (`st.cache_resource`), OpenCV ile video kare kare işleme.
 - *Hocaya:* "Kullanıcı görüntü veya video yükler; model her hasarı kutu, sınıf ve güven skoruyla gösterir."
 
-**Adım 8: Gerçek zamanlı kamera** (streamlit-webrtc; yerelde test, FPS ölçümü, düşük FPS'te küçük model/imgsz seçeneği)
+**Adım 8: Gerçek zamanlı kamera** (vizeden sonra; streamlit-webrtc; yerelde test, FPS ölçümü, GPU'suz bilgisayarda yedek YOLO26n)
 - *Ne öğreneceğim:* WebRTC'nin temel mantığı, kare başına çıkarım süresi, hız/doğruluk dengesi.
 - *Hocaya:* "Tarayıcı kamerasından gelen her kare modele gidiyor; GTX 1650'de X FPS elde ettik."
 
-**Adım 9: Final değerlendirme** (seçilen modelle test setinde tek ölçüm, örnek doğru/yanlış tahminler, hata analizi)
+**Veri sızıntısı kontrolü (pHash)** (vizeden sonra, Adım 9'dan önce): val/test görüntülerinden train'deki bir görüntüye çok benzeyenlerin (algısal hash, pHash) oranı ölçülür. Oran yüksekse temiz alt kümede yeniden değerlendirme yapılır ve raporda sınırlama olarak yazılır. Adım 1'deki sekans (ardışık kare) kontrolünden farklı: o yalnız dosya numarası ardışık çiftlere bakıyordu.
+
+**Adım 9: Final değerlendirme** (vizeden sonra; seçilen modelle test setinde tek ölçüm, örnek doğru/yanlış tahminler, hata analizi)
 - *Ne öğreneceğim:* hata analizi; modelin nerede, neden yanıldığını yorumlamak.
 - *Hocaya:* "Model en çok X'te zorlanıyor çünkü Y" (ör. ince boyuna çatlaklar, Norveç'in küçük nesneleri).
 
-**Adım 10: Rapor ve sunum** (rapor taslağı Aralık başında başlar; slaytlar; yedek demo videosu; SDG 11 bağlantısı; prova)
+**Adım 10: Rapor ve sunum**
+- **10a ara rapor + vize:** şablonun "midterm" bölümleri (sıra ve durum: `docs/rapor/ozel/yol-haritasi.md`), slaytlar, prototip demosu (yedek: ekran kaydı).
+- **10b final rapor (vizeden sonra):** System Design, System Test Design, Discussion of Results, Similarity Report; slaytlar; yedek demo videosu; prova.
 - *Ne öğreneceğim:* bilimsel rapor yapısı (giriş, ilgili çalışmalar, yöntem, deneyler, sonuç), sonuçları görselleştirme.
 - *Hocaya:* "Belediyeler yol bakımını önceliklendirebilir → SDG 11 sürdürülebilir şehirler."
 
 **Adım 11 (ek, zaman kalırsa):** GPS → SQLite → harita → takip.
 
 ### Görev dağılımı önerisi (2 kişi)
-Kişi A / Kişi B'nin kim olacağı henüz belli değil (§10).
+Kişi A / Kişi B'nin kim olacağı henüz belli değil (§10); ara raporun Schedule bölümü yazılırken netleşecek.
 - **Kişi A (model):** Adım 1-6, 9
 - **Kişi B (uygulama):** Adım 7-8 (başta referansın hazır modeliyle, sonra bizim modelle), Git düzeni, ek özellikler
 - **Ortak:** Adım 2 kararları, rapor, sunum
 - **Not:** Her hafta birbirimize yaptıklarımızı anlatırız; ikimiz de projenin tamamını sunabilmeliyiz.
 
-## 8. Haftalık zaman çizelgesi (teslim ~2 Ocak 2027)
-| Hafta | Tarih | Model tarafı (A) | Uygulama tarafı (B) |
-|---|---|---|---|
-| 1 | 19–25 Eki | Kurulum, analiz script'i | Kurulum, Git/GitHub, Streamlit + Ultralytics ile tanışma |
-| 2 | 26 Eki–1 Kas | Analiz sonuçları, veri kararları, dönüştürücü + bölme | Referans uygulamayı çalıştırıp inceleme, iskelet `src/app/` |
-| 3 | 2–8 Kas | Kaggle kurulumu, YOLOv8n kısa deneme (resume testi dahil) | Görüntü sayfası (hazır modelle) |
-| 4 | 9–15 Kas | Baseline v8s/640, değerlendirme script'i | Video sayfası |
-| 5 | 16–22 Kas | Model karşılaştırması | Gerçek zamanlı kamera (webrtc) ilk sürüm |
-| 6 | 23–29 Kas | Augmentation + dengesizlik deneyleri | Kamera FPS ölçümü, arayüz iyileştirme |
-| 7 | 30 Kas–6 Ara | Final model seçimi, test ölçümü, hata analizi | Final modeli arayüze bağlama |
-| 8 | 7–13 Ara | **Ana kapsam tamam** (kontrol noktası). Rapor: veri + yöntem | Ek özellik 1 (GPS) başlarsa |
-| 9 | 14–20 Ara | Rapor: deneyler + sonuçlar | Ek özellikler (DB, harita) zaman kalırsa |
-| 10 | 21–27 Ara | Slaytlar, demo videosu, prova | Slaytlar, demo videosu, prova |
-| 11 | 28 Ara–3 Oca | Tampon + teslim | Tampon + teslim |
+## 8. İş sırası
+Teslim: **ara rapor 23 Kas 2026 23:00**, **vize sunumu 24 Kas 2026**; final Aralık sonu / Ocak başı.
+Tamamlananlar: Adım 0–6 (veri, dönüştürme, baseline, değerlendirme, karşılaştırma; final model e5).
 
-Ara rapor 23 Kas 2026 23:00, vize sunumu 24 Kas 2026.
+**Vizeye kadar** (sırayla)
+1. Rapor: Standards to be Used → Legal Consequences → Health/Environment → Sustainable Development Goal
+2. Streamlit görüntü prototipi (Adım 7a)
+3. Rapor: Approaches, Techniques, Technologies → Risk Management → Project Schedule and Task Sharing → Use Case Model (UML) → Object Model (UML)
+4. Rapor: Introduction → Abstract + 5 keyword → IEEE numaralarını yeniden sıralama → Word'e aktarma
+5. Son kontrol (karakter sayıları, açılır listeler, kapak), yükleme, Teams formu
+6. Slaytlar + prototip demosu (yedek: ekran kaydı)
 
-Not: vize/final haftaları ve kesin teslim tarihi bilinince çizelge güncellenecek.
+**Vizeden sonra** (sırayla)
+1. Adım 7b: Home, Video sayfası, sonuç indirme
+2. Adım 8: gerçek zamanlı kamera
+3. Testler
+4. Veri sızıntısı kontrolü (pHash; Adım 9'dan önce)
+5. Adım 9: test setinde tek ölçüm, hata analizi
+6. Adım 10b: final rapor bölümleri, slaytlar, demo videosu, prova
+7. Ağırlıkları GitHub Releases'a yükleme; (isteğe bağlı) birleşik model; Adım 11 ek özellikler zaman kalırsa
 
 ---
 
@@ -242,5 +248,5 @@ Not: vize/final haftaları ve kesin teslim tarihi bilinince çizelge güncellene
 - Adım 1: toplamlar tutmalı (38.385 görüntü / 61.082 etiket / D00 26.196 / D10 11.875 / D20 10.617 / D40 6.544).
 - Adım 3: 20 rastgele örnek kutularıyla çizilip göz kontrolü; `yolo val/train` veri setini hatasız taramalı.
 - Adım 9: bizim modelin Japonya+Hindistan test alt kümesindeki mAP50'si, referansın **raporladığı** 0,547 ile karşılaştırılır (Adım 5'te val'de ön karşılaştırma yapıldı: 0,522).
-- **Referansın hazır modeli (`YOLOv8_Small_RDD.pt`) bizim test setimizde ölçülmez.** Aynı havuzdaki Japonya+Hindistan train görüntüleriyle eğitildi; bizim test görüntülerimizin bir kısmını görmüş olabilir (veri sızıntısı). Yalnızca arayüzün uçtan uca çalıştığını test etmek için kullanılır (Adım 7-8).
+- **Referansın hazır modeli (`YOLOv8_Small_RDD.pt`) bizim test setimizde ölçülmez.** Aynı havuzdaki Japonya+Hindistan train görüntüleriyle eğitildi; bizim test görüntülerimizin bir kısmını görmüş olabilir (veri sızıntısı). Yalnızca arayüzün uçtan uca çalıştığını test etmek için kullanılır (Adım 7-8; isteğe bağlı, prototip doğrudan e5 kullanıyor).
 - Not: 0,547 referansın kendi val bölmesinde, farklı görüntülerde ölçüldü. Karşılaştırma yaklaşık; raporda böyle belirtilecek.

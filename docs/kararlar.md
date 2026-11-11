@@ -273,3 +273,32 @@ Her kayıt: tarih — karar — gerekçe.
   iddiası tüm kaynaklar için kanıtlanmadığı için yumuşatıldı.
 - Metinden çıkan alıntılar Kaynak Kontrol Tablosu'nda kayıt olarak duruyor (tablonun üstünde not var). Türkçe çeviri
   (`ozel/literatur-taramasi-turkce.md`, git dışı) yeni metne göre güncellendi.
+
+## 2026-11-11 — Vize planı: ara rapor + yalnız görüntü prototipi
+- **Karar:** Vizeye (ara rapor 23 Kas 23:00, sunum 24 Kas) kadar ara raporun midterm bölümleri bitirilir ve küçük bir
+  Streamlit **görüntü** prototipi gösterilir (fotoğraf yükleme, e5 ile tespit, kutu + sınıf + güven skoru, güven eşiği
+  kaydırıcısı). Video, kamera, testler, pHash veri sızıntısı kontrolü, test seti ölçümü (Adım 9) ve ek özellikler
+  vizeden sonra. Kapsam değişmiyor, yalnız sıra. plan.md §8 ve yol haritası tarihsiz sıra listesine çevrildi.
+- **Veri sızıntısı kontrolü (pHash):** val/test görüntülerinden train'deki bir görüntüye çok benzeyenlerin oranı ölçülür;
+  yüksekse temiz alt kümede yeniden değerlendirme + raporda sınırlama. Adım 9'dan önce yapılır; Adım 1'deki sekans
+  kontrolünden farklı.
+- **Gerekçe:** Şablon ara raporda sonuç istemiyor (System Test, Discussion final'de); kalan sürenin çoğu rapor bölümlerine
+  gerekiyor. Prototip, önerideki arayüzün çalıştığını vizede göstermek için yeterli. Şablon gövdesi esas alınır
+  (duyurudaki liste ile bölüm sırası/numaraları tutmuyor).
+- **Not:** Ağırlıklar henüz GitHub Releases'ta değil (`gh release list` boş); prototip e5'i yerelden
+  (`runs/kaggle/e5_yolo26s_1024/weights/best.pt`) yükler, Releases'a yükleme vizeden sonra.
+
+## 2026-11-11 — Ara rapor: Standards to be Used
+- **Karar:** Standartlar: ISO/IEC/IEEE 29148:2018 (gereksinim), ISO/IEC 25010:2023 (kalite modeli), ISO/IEC/IEEE
+  29119-1:2021 ve 29119-3:2021 (test), OMG UML 2.5.1, ASTM D6433-24 (yalnız alan bağlantısı), COCO değerlendirmesi
+  (mAP50 = PASCAL VOC metriği, mAP50-95), PEP 8, IEEE kaynak stili. Gereksinimler (29148) şimdiki zaman: bu raporun
+  Use Case bölümünde "The system shall ..." biçiminde yazılıyor; kalite (25010) ve test (29119) gelecek zaman.
+  ASTM için: sınıflar RDD2022'nin etiketleme şemasını izliyor, kategoriler ilk olarak Japon kılavuzuna (JRA 2013) göre
+  tanımlandı, ASTM'den alınmadı; ASTM D6433 de görsel denetimle gözlenen yüzey hasarına dayanıyor, modelin bulduğu da
+  görünür yüzey hasarı (sınıf eşlemesi çıkarımı yok); PCI hesaplanmıyor. ISO/IEC 19505 ve ayrı PASCAL VOC kaynağı çıkarıldı. PEP 8 cümlesi yumuşatıldı ("is written
+  following PEP 8 conventions"; kod bir stil denetleyicisiyle kontrol edilmedi). Metin 1.465 kr.
+  Yeni kaynaklar geçici olarak [20]–[28]; rapor birleştirilirken yeniden sıralanacak.
+- **Gerekçe:** Her standart resmî sayfada doğrulandı (iso.org otomatik erişime 403 verdi: ortak standartlar IEEE SA'dan,
+  25010 kullanıcı tarafından iso.org'da elle). RDD2022 PDF'inde ASTM/PCI hiç geçmiyor; ASTM'nin resmî sayfasında hasar
+  türü listesi yok, bu yüzden adlarıyla eşleme yazılmadı. Testler final döneminde yapılacağı için şimdiki zaman kullanılmadı.
+- Ayrıntı: [rapor/standartlar.md](rapor/standartlar.md) (Kaynak Kontrol Tablosu; git dışı kopyası ve Türkçe açıklaması `rapor/ozel/` altında)
