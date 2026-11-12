@@ -342,3 +342,15 @@ Her kayıt: tarih — karar — gerekçe.
 - **Kendi cümlelerimiz:** İlk taslakta Safety, Economic ve Social paragraflarındaki cümleler kaynak ifadelerine çok
   yakındı (WHO, NCHRP, FHWA, Maeda, RDD2022); literatürdeki kurala göre anlam aynı kalacak şekilde yeniden yazıldı.
 - Ayrıntı: [rapor/saglik-cevre.md](rapor/saglik-cevre.md) (Kaynak Kontrol Tablosu; git dışı kopyası ve Türkçe açıklaması `rapor/ozel/` altında)
+
+## 2026-11-12 — Ara rapor: Sustainable Development Goal
+- **Karar:** Seçilen hedef SDG 11. Ana bağlantı **11.2'nin yalnız yol güvenliği kısmı** (hedef yılı 2030); toplu taşıma
+  kısmı ve 11.2.1 göstergesi metne girmedi. Destekleyici yalnız **9.1** (tek cümle; hedef yılı yok). **3.6 çıkarıldı:**
+  resmî metinde hedef yılı 2020 (2026 düzeltmeli çerçevede de değişmemiş), süresi geçmiş; ölüm verileri
+  Health/Environment'ta. Katkı "destekler" düzeyinde: hasarın yerini göstererek bakımın daha erken planlanmasına yardım;
+  hedefe tek başına ulaştırmaz, yol güvenliğine etkisi ölçülmedi. Metin 1.269 kr.; tek kaynak [41].
+- **Kaynak:** BM'nin resmî gösterge çerçevesi (A/RES/71/313, E/CN.3/2026/12 düzeltmesiyle; unstats.un.org PDF);
+  sdgs.un.org goal sayfalarıyla birebir aynı. sdgs.un.org Goal 11 sayfası ayrı kaynak olarak eklenmedi.
+- **Gerekçe:** Bağlantıyı abartmamak ve Health/Environment'ı tekrar etmemek. BM metinleri kendi cümlelerimizle
+  anlatıldı; birebir metinler yalnız Kaynak Kontrol Tablosu'nda.
+- Ayrıntı: [rapor/sdg.md](rapor/sdg.md) (Kaynak Kontrol Tablosu; git dışı kopyası ve Türkçe açıklaması `rapor/ozel/` altında)
