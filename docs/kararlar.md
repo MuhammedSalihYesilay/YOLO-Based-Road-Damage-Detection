@@ -324,3 +324,21 @@ Her kayıt: tarih — karar — gerekçe.
   AGPL §13, ultralytics.com/license, GitHub Docs, mevzuat.gov.tr 6698 PDF). GDPR'ın madde metni EUR-Lex'ten okunamadı;
   yalnız AB Yayın Ofisi'ndeki resmî başlık kullanıldı, tanım metne konmadı. Kamera modu henüz yok → gelecek zaman.
 - Ayrıntı: [rapor/yasal.md](rapor/yasal.md) (Kaynak Kontrol Tablosu; git dışı kopyası ve Türkçe açıklaması `rapor/ozel/` altında)
+
+## 2026-11-12 — Ara rapor: Effects on Health, Environment and the Problems of the Age
+- **Karar:** Dört kısa paragraf: güvenlik ve sağlık (WHO bilgi notu), ekonomik ve çevresel etkiler (NCHRP 720, FHWA
+  pavement preservation, projenin kendi enerji maliyeti), toplumsal boyut ve çağın sorunları (Maeda [1], RDD2022 [4],
+  final modelin GTX 1650 hızı), güvenli kullanım (kaynaksız tasarım kararı: kamera modu sabit montaj ya da yolcu).
+  **Kaza azaltma iddiası yok**; sistemin etkisi yalnız "hasarı daha erken bulmaya yardım". Metin 1.399 kr.; kaynaklar
+  geçici olarak [38]–[40]. Motosiklet el kitabı ve SDG hedefleri çıkarıldı (SDG bölümüne bırakıldı).
+- **WHO sayısı:** 2023 raporu "1.19 million", Temmuz 2026 bilgi notu "Approximately 1.16 million" diyor; daha güncel
+  bilgi notu kullanıldı, rapor kaynakçaya alınmadı.
+- **Kendi verimiz:** Yedi deneyin toplam eğitimi (results.csv eğitim döngüleri) 2.774 dk ≈ 46 GPU saati (deneme
+  koşuları ve Kaggle kurulumu dahil değil). CO₂ değeri yazılmadı (doğrulanmış hesap yok).
+- **Gerekçe:** Her iddia resmî / birincil kaynakta birebir alıntıyla doğrulandı (WHO, NAP + Crossref, fhwa.dot.gov,
+  Maeda ve RDD2022 arXiv PDF'leri). Doğrulanamayanlar metne konmadı: erken bakımın çevre faydası (highways.dot.gov 403,
+  FHWA-HIF-15-002 404), bakım/çukur ile kaza arasındaki nedensellik (WHO sayfasında yok). Yaşlanan altyapı fikri
+  Maeda'da birebir geçtiği için ("aging road infrastructure") kullanıldı.
+- **Kendi cümlelerimiz:** İlk taslakta Safety, Economic ve Social paragraflarındaki cümleler kaynak ifadelerine çok
+  yakındı (WHO, NCHRP, FHWA, Maeda, RDD2022); literatürdeki kurala göre anlam aynı kalacak şekilde yeniden yazıldı.
+- Ayrıntı: [rapor/saglik-cevre.md](rapor/saglik-cevre.md) (Kaynak Kontrol Tablosu; git dışı kopyası ve Türkçe açıklaması `rapor/ozel/` altında)
