@@ -12,9 +12,9 @@
 
 **Dataset.** The figshare record of RDD2022 gives its license as CC BY 4.0 [36], [37], while the README of its GitHub repository gives CC BY-SA 4.0 [29], [30]. We follow the stricter terms: the dataset is credited in this report and in our repository, and adapted data, if shared, will carry the same license, as CC BY-SA requires [29]. Our converted YOLO-format copy was uploaded to Kaggle as a private dataset and is not publicly available.
 
-**Software.** Ultralytics YOLO is licensed under AGPL-3.0 [32]. Section 13 of this license requires offering the source code to users who interact with a modified version over a network [31]. Our code is kept in a public repository, and its license will be chosen to be compatible with AGPL-3.0. The reference project [19] has no license file, so default copyright applies and its code may not be reused [33]; we only studied it and wrote our own code.
+**Software.** Ultralytics YOLO is licensed under AGPL-3.0 [32]. Under Section 13 of this license, people who use a modified version remotely over a network must be given a way to obtain its source code [31]. Our code is kept in a public repository, and its license will be chosen to be compatible with AGPL-3.0. Since the reference project [19] carries no license, copyright law gives others no permission to copy or build on its code [33]; we only studied it and wrote our own code.
 
-**Personal data.** Road images may show faces and license plates. Turkish Law No. 6698 treats any information about an identified or identifiable person as personal data [34], and the GDPR [35] regulates the processing of personal data in the EU; part of the images was collected in the Czech Republic. The planned camera mode will process frames without storing them.
+**Personal data.** Road images may show faces and license plates. Turkish Law No. 6698 counts any information that can be linked to a specific person as personal data [34], and the GDPR [35] regulates the processing of personal data in the EU; part of the images was collected in the Czech Republic. The planned camera mode will process frames without storing them.
 
 **Responsibility.** The system is designed as a decision-support tool: it marks possible damage, and the final decision stays with a human inspector.
 <!-- LEGAL-END -->
@@ -92,6 +92,10 @@ olana (CC BY-SA: atıf + aynı lisansla paylaşım) uyduğumuz söylendi.
   madde metni doğrulanamadı. AB bağlantısı somut olgu olarak yazıldı (Çek Cumhuriyeti), Norveç/AEA yorumu yapılmadı.
   Kamera modu henüz yapılmadığı için "will process frames without storing them" (gelecek zaman).
 - **Sorumluluk:** Kaynaksız tasarım kararımız; hukuki dayanak iddia edilmiyor.
+- **Kendi cümlelerimiz (2026-11-12 kontrolü):** Kaynağa neredeyse birebir olan üç cümle yeniden yazıldı, anlam aynı:
+  AGPL §13 ("offer all users interacting with it remotely through a computer network … Corresponding Source"), GitHub
+  Docs ("the default copyright laws apply"), KVKK çevirisi ("any information relating to an identified or identifiable
+  natural person"). Diğer cümleler zaten kendi cümlemiz.
 - *Anlatım:* "Veri setinin lisansı iki resmî kaynakta farklı yazıyor (CC BY ve CC BY-SA); biz daha katı olana uyuyoruz:
   atıf veriyoruz, uyarlanmış veriyi paylaşırsak aynı lisansla paylaşacağız. Uyarladığımız kopyayı herkese açık paylaşmadık.
   YOLO kütüphanesi AGPL lisanslı, kodumuz zaten açık ve lisansını buna uygun seçeceğiz. Referans projenin lisansı

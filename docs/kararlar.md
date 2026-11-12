@@ -296,7 +296,7 @@ Her kayıt: tarih — karar — gerekçe.
   ASTM için: sınıflar RDD2022'nin etiketleme şemasını izliyor, kategoriler ilk olarak Japon kılavuzuna (JRA 2013) göre
   tanımlandı, ASTM'den alınmadı; ASTM D6433 de görsel denetimle gözlenen yüzey hasarına dayanıyor, modelin bulduğu da
   görünür yüzey hasarı (sınıf eşlemesi çıkarımı yok); PCI hesaplanmıyor. ISO/IEC 19505 ve ayrı PASCAL VOC kaynağı çıkarıldı. PEP 8 cümlesi yumuşatıldı ("is written
-  following PEP 8 conventions"; kod bir stil denetleyicisiyle kontrol edilmedi). Metin 1.465 kr.
+  following PEP 8 conventions"; kod bir stil denetleyicisiyle kontrol edilmedi). Metin 1.465 kr. (2026-11-12 kaynağa yakın ifade düzeltmesiyle 1.442)
   Yeni kaynaklar geçici olarak [20]–[28]; rapor birleştirilirken yeniden sıralanacak.
 - **Gerekçe:** Her standart resmî sayfada doğrulandı (iso.org otomatik erişime 403 verdi: ortak standartlar IEEE SA'dan,
   25010 kullanıcı tarafından iso.org'da elle). RDD2022 PDF'inde ASTM/PCI hiç geçmiyor; ASTM'nin resmî sayfasında hasar
@@ -307,7 +307,7 @@ Her kayıt: tarih — karar — gerekçe.
 - **Karar:** Legal metni dört konu: veri seti lisansı (CC BY 4.0 / CC BY-SA 4.0 çelişkisi, aşağıda), yazılım lisansları (Ultralytics AGPL-3.0, lisanssız
   referans proje), kişisel veri (KVKK 6698, GDPR), sorumluluk (karar destek aracı, son karar insanda: kaynaksız, kendi
   tasarım kararımız). Hukuki yorum yok; yalnız kaynağın dediği ve bizim yaptığımız / yapacağımız. AB Yapay Zekâ Yasası
-  ve diğer kütüphane lisansları çıkarıldı. Metin 1.421 kr.; kaynaklar geçici olarak [29]–[37].
+  ve diğer kütüphane lisansları çıkarıldı. Metin 1.421 kr. (2026-11-12 düzeltmesiyle 1.449); kaynaklar geçici olarak [29]–[37].
 - **Kodun lisansı:** Repoda LICENSE dosyası yok. Ultralytics AGPL-3.0 olduğu için kodumuzun lisansı **AGPL-3.0 ile uyumlu**
   seçilecek; dosya şimdi eklenmedi (ne zaman ve hangi lisans: ekip kararı).
 - **Kaggle:** YOLO formatlı kopya private yüklendi, herkese açık değil; metinde yalnız bu olgu, hukuki yorum yok.
@@ -329,7 +329,7 @@ Her kayıt: tarih — karar — gerekçe.
 - **Karar:** Dört kısa paragraf: güvenlik ve sağlık (WHO bilgi notu), ekonomik ve çevresel etkiler (NCHRP 720, FHWA
   pavement preservation, projenin kendi enerji maliyeti), toplumsal boyut ve çağın sorunları (Maeda [1], RDD2022 [4],
   final modelin GTX 1650 hızı), güvenli kullanım (kaynaksız tasarım kararı: kamera modu sabit montaj ya da yolcu).
-  **Kaza azaltma iddiası yok**; sistemin etkisi yalnız "hasarı daha erken bulmaya yardım". Metin 1.399 kr.; kaynaklar
+  **Kaza azaltma iddiası yok**; sistemin etkisi yalnız "hasarı daha erken bulmaya yardım". Metin 1.403 kr.; kaynaklar
   geçici olarak [38]–[40]. Motosiklet el kitabı ve SDG hedefleri çıkarıldı (SDG bölümüne bırakıldı).
 - **WHO sayısı:** 2023 raporu "1.19 million", Temmuz 2026 bilgi notu "Approximately 1.16 million" diyor; daha güncel
   bilgi notu kullanıldı, rapor kaynakçaya alınmadı.

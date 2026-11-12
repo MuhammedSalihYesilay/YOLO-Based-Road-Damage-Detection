@@ -13,11 +13,11 @@
 <!-- HEALTH-START -->
 ### Effects on Health, Environment and the Problems of the Age Reflected in the Field of Engineering
 
-**Safety and health.** Road crashes kill about 1.16 million people each year, and pedestrians, cyclists and motorcyclists account for over half of these deaths [38]. According to WHO, the way a road is built has a large effect on how safe it is [38]. This project does not claim to prevent crashes; it only helps find damage earlier.
+**Safety and health.** Road crashes kill about 1.16 million people each year, and pedestrians, cyclists and motorcyclists account for over half of these deaths [38]. According to WHO, the way a road is designed has a large effect on how safe it is [38]. This project does not claim to prevent crashes; it only helps find damage earlier.
 
 **Economic and environmental effects.** The state of the road surface changes how much drivers spend on fuel, tires and vehicle repairs [39]. Repairing a road before its condition becomes poor slows its decline and keeps it in use longer at a reasonable cost [40]. Our work also has an energy cost: the total training of the seven experiments took about 46 GPU hours.
 
-**Social dimension and problems of the age.** Checking roads by eye depends on trained people and takes much time and money. Where such people and funds are scarce, roads are checked less often and aging roads become more dangerous, a problem Maeda et al. expect in many countries [1]. Cameras mounted on vehicles combined with automatic detection could let municipalities survey wide road networks cheaply and fast [4]; our final model runs at about 25 FPS on a GTX 1650 GPU.
+**Social dimension and problems of the age.** Checking roads by eye depends on trained people and takes much time and money. Where such people and funds are scarce, roads are checked less often and the risks tied to aging roads grow, a problem Maeda et al. expect in many countries [1]. Cameras mounted on vehicles combined with automatic detection could let municipalities survey wide road networks cheaply and fast [4]; our final model runs at about 25 FPS on a GTX 1650 GPU.
 
 **Safe use.** The real-time camera mode is meant to be used with a fixed mount or by a passenger, so that the driver is not distracted.
 <!-- HEALTH-END -->

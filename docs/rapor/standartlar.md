@@ -16,7 +16,7 @@
 
 **Modeling.** The use case and class diagrams in this report are drawn in UML 2.5.1 [24].
 
-**Road damage.** Our four damage classes follow the labeling scheme of RDD2022 [4]; these categories were first defined according to a Japanese road maintenance guidebook and were not taken from ASTM D6433-24 [25]. ASTM D6433 also relies on surface distress observed through visual inspection, and the damage our model detects is of this kind: visible damage on the pavement surface. This project does not compute a Pavement Condition Index (PCI).
+**Road damage.** Our four damage classes follow the labeling scheme of RDD2022 [4]; these categories were first defined according to a Japanese road maintenance guidebook and were not taken from ASTM D6433-24 [25]. ASTM D6433 also judges pavement condition from damage that inspectors can see on the surface, which is the same kind of damage our model detects. This project does not compute a Pavement Condition Index (PCI).
 
 **Evaluation and code.** Detection accuracy is reported with the metrics of the COCO evaluation [10], [26]: mAP50, which COCO also calls the PASCAL VOC metric, and mAP50-95. The Python code is written following PEP 8 conventions [27], and the references follow the IEEE reference style [28].
 <!-- STD-END -->
@@ -90,6 +90,9 @@ Cenevre) resmî sayfalarda doğrulanmadığı için yazılmadı.
   yüzey hasarına dayanıyor, modelimizin bulduğu da görünür yüzey hasarı. "Benzer türlere karşılık geliyor" gibi bir
   eşleme çıkarımı yapılmadı (ASTM'nin hasar listesi doğrulanamadı). PCI hesaplamadığımız açıkça yazıldı: model hasarı
   bulur ama yolu puanlamaz.
+- **Kendi cümlelerimiz (2026-11-12 kontrolü):** Yalnız ASTM cümlesi kaynağa ("based on the distress observed on the
+  surface" / "through visual surveys") çok yakındı; anlam aynı kalacak şekilde yeniden yazıldı. Diğer cümleler zaten
+  kendi cümlemiz olduğu için değiştirilmedi.
 - **COCO / PASCAL VOC:** Bunlar ISO gibi resmî standart değil, alanda fiilen kullanılan ölçüm kuralları. Ana metriğimiz
   mAP50, COCO sayfasında "PASCAL VOC metric" diye geçiyor; bu, referans projeyle ve literatürle karşılaştırmayı mümkün kılıyor.
 - *Anlatım:* "Gereksinimleri bu raporda 29148'e göre yazdık; kalite hedeflerini 25010'a, final testlerini 29119'a
