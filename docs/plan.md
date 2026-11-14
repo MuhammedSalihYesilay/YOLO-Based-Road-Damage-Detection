@@ -175,8 +175,9 @@ Görüntü açmaz; sadece `ann/*.json` okunur, boyutlar JSON'daki `size` alanın
 - *Ne öğreneceğim:* model boyutu ile hız ve doğruluk ilişkisi, augmentation türleri, dengesiz veriyle başa çıkma.
 - *Hocaya:* "Aynı veriyle, tek bir değişkeni değiştirerek karşılaştırdık; tablo ve grafik burada. En iyisini val'e göre seçtik, test'e en son bir kez baktık."
 
-**Adım 7: Streamlit arayüzü** — `src/app/`
+**Adım 7: Streamlit arayüzü** — `src/app/` ([ayrıntı](adimlar/adim-7-arayuz.md))
 - **7a (vizeye kadar):** yalnız Görüntü sayfası prototipi: fotoğraf yükleme, e5 ile tespit (FP32 `half=False`, `imgsz=1024`; kararlar.md 2026-10-30), kutu + sınıf + güven skoru, güven eşiği kaydırıcısı. Model yerelden: `runs/kaggle/e5_yolo26s_1024/weights/best.pt`. `requirements.txt`'e streamlit eklenir.
+- ✅ 2026-11-14: Görüntü sayfası tamamlandı (streamlit 1.67.0; FP32 `quantize=32`, Ultralytics 8.4.182'de `half` kullanımdan kalkıyor). Çoklu yükleme + 10 örnek görüntü (RDD2022 etiketsiz resmî test, ABD hariç; `src/app/assets/demo/`), eşik (varsayılan 0,25) ve sınıf filtresi, TR/EN, seçim değişince sonuca otomatik kaydırma. Elle testler geçti (kararlar.md 2026-11-14).
 - **7b (vizeden sonra):** Home, Video sayfası, sonuç indirme.
 - *Ne öğreneceğim:* Streamlit sayfa yapısı, model önbellekleme (`st.cache_resource`), OpenCV ile video kare kare işleme.
 - *Hocaya:* "Kullanıcı görüntü veya video yükler; model her hasarı kutu, sınıf ve güven skoruyla gösterir."
@@ -208,11 +209,11 @@ Kişi A / Kişi B'nin kim olacağı henüz belli değil (§10); ara raporun Sche
 
 ## 8. İş sırası
 Teslim: **ara rapor 23 Kas 2026 23:00**, **vize sunumu 24 Kas 2026**; final Aralık sonu / Ocak başı.
-Tamamlananlar: Adım 0–6 (veri, dönüştürme, baseline, değerlendirme, karşılaştırma; final model e5).
+Tamamlananlar: Adım 0–6 (veri, dönüştürme, baseline, değerlendirme, karşılaştırma; final model e5), Adım 7a (Streamlit görüntü prototipi).
 
 **Vizeye kadar** (sırayla)
 1. Rapor: Standards to be Used → Legal Consequences → Health/Environment → Sustainable Development Goal
-2. Streamlit görüntü prototipi (Adım 7a)
+2. ~~Streamlit görüntü prototipi (Adım 7a)~~ ✅ 2026-11-14
 3. Rapor: Approaches, Techniques, Technologies → Risk Management → Project Schedule and Task Sharing → Use Case Model (UML) → Object Model (UML)
 4. Rapor: Introduction → Abstract + 5 keyword → IEEE numaralarını yeniden sıralama → Word'e aktarma
 5. Son kontrol (karakter sayıları, açılır listeler, kapak), yükleme, Teams formu

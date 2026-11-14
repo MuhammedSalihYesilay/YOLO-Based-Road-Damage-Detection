@@ -21,7 +21,7 @@ GPS eşleştirme → veritabanına kayıt → harita gösterimi → aynı hasar�
 - PyTorch (Ultralytics'in altındaki derin öğrenme kütüphanesi)
 - Ultralytics YOLO (eğitim, değerlendirme, tahmin)
 - OpenCV (görüntü/video/kamera işleme)
-- Streamlit + streamlit-webrtc (web arayüzü, gerçek zamanlı kamera)
+- Streamlit 1.67.0 (web arayüzü) + streamlit-webrtc (gerçek zamanlı kamera, Adım 8'de eklenecek)
 - pandas, matplotlib (analiz ve grafikler)
 - Git / GitHub (repo: github.com/MuhammedSalihYesilay/YOLO-Based-Road-Damage-Detection, Public, dal main)
 - Eğitim: ağır eğitim Kaggle'da (yedek Colab); analiz, dönüştürme, küçük denemeler, değerlendirme,
@@ -54,7 +54,7 @@ GPS eşleştirme → veritabanına kayıt → harita gösterimi → aynı hasar�
   - Format: Supervisely JSON — `train|test/{ann,img,meta}`, etiketler `ann/*.jpg.json`,
     hepsi dikdörtgen (bbox). Pascal VOC XML değil.
   - Etiketli görüntü: train'deki 38.385 (61.082 etiket). Test klasöründeki 9.035 görüntü
-    etiketsiz; sadece görsel demo için kullanılabilir.
+    etiketsiz; sadece görsel demo için kullanılabilir. Arayüz örnekleri buradan (src/app/assets/demo/, 10 görüntü, CC BY-SA 4.0).
   - Etiketli verinin tamamı kullanılacak
   - Çin Drone görüntüleri de eğitime dahil edilecek (dikkatli ele alınacak)
   - Lisans: kaynaklar çelişiyor: figshare kaydı (DOI 10.6084/m9.figshare.21431547) CC BY 4.0, GitHub README'si
@@ -92,7 +92,7 @@ GPS eşleştirme → veritabanına kayıt → harita gösterimi → aynı hasar�
   Gerçek zamanlı kamerada GTX 1650'de ≥ 15 FPS.
 - Test parçası yalnızca en sonda, seçilen model için bir kez kullanılır; model seçimi val ile yapılır.
 - Ölçüm yolu: tüm modeller `src/eval/evaluate.py` ile yerelde FP32 ölçülür, bu değer esas alınır (baseline val
-  mAP50 0,571; Kaggle'ın eğitim sonu değeri 0,589 yalnızca not). GTX 1650'de FP16 bozuk (mAP50 0,04): FPS ve arayüz FP32.
+  mAP50 0,571; Kaggle'ın eğitim sonu değeri 0,589 yalnızca not). GTX 1650'de FP16 bozuk (mAP50 0,04): FPS ve arayüz FP32. Arayüzde quantize=32 (Ultralytics 8.4.182'de half kullanımdan kalkıyor; float32 doğrulandı).
   Sonuç tablosu: `docs/deneyler.md` (kararlar.md, 2026-10-30)
 - Referansın hazır modeli (`YOLOv8_Small_RDD.pt`) bizim test setimizde **ölçülmez**:
   aynı havuzdaki Japonya+Hindistan train görüntüleriyle eğitildi (veri sızıntısı).
@@ -103,7 +103,7 @@ Görüntü boyutları ülkeye göre farklı (train sayıları; datasetninja'daki
 - Japonya: 10.506 görüntü. Çoğu 600x600 (10.187), ayrıca 540x540 (124), 1024x1024 (147), 1080x1080 (48)
 - Çek Cumhuriyeti: 2.829 görüntü, 600x600
 - Hindistan: 7.706 görüntü, 720x720. Orijinali 960x720'den sıkıştırılmış, en-boy oranı bozuk; dokunulmuyor
-- ABD: 4.805 görüntü, 640x640
+- ABD: 4.805 görüntü, 640x640. Görüntülerde Google filigranı var (Street View kaynaklı olabilir, kullanım koşulları doğrulanmadı); public demo setine konmaz (kararlar.md 2026-11-14)
 - Çin: iki alt küme, ikisi de 512x512. China_Drone 2.401 (yukarıdan çekim; test klasöründe yok),
   China_MotorBike 1.977
 - Norveç: 8.161 görüntü, üç boyut: 4040x2035 (4.342), 3643x2041 (2.896), 3650x2044 (923).
@@ -126,13 +126,17 @@ yol-hasari/
   docs/rapor/ozel/ ← (git dışı)
   data/            ← veri seti (git'e girmez)
   reference/       ← referans proje (sadece okunur, değiştirilmez)
-  src/             ← bizim kodumuz (analysis/, data/, eval/)
+  src/             ← bizim kodumuz (analysis/, data/, eval/, app/)
+  .streamlit/      ← Streamlit tema/sunucu ayarları (config.toml; uygulama kökten çalıştırılır)
+  src/app/         ← Streamlit arayüzü (app.py, pages/, core/)
+  src/app/assets/demo/ ← örnek görüntüler + KAYNAK.md (git'e girer, CC BY-SA 4.0)
   docs/adimlar/    ← adım belgeleri (her adımda ne yapıldı, nasıl tekrar edilir, hocaya anlatım)
   docs/deneyler.md ← tüm deneylerin ayar ve sonuç tablosu (val, yerel FP32)
   docs/model-secimi.md ← final model seçimi: kısa özet (7 deney), mimari (YOLO26s, kuraldan sapma), final (imgsz 1024)
   docs/degerlendirme/ ← değerlendirme özetleri (evaluate.py / measure_fps.py kopyası, git'e girer)
   runs/kaggle/     ← Kaggle'dan indirilen eğitim çıktıları (best.pt, args.yaml, results.csv, grafikler; git dışı)
   runs/eval/       ← değerlendirme ham çıktıları (git dışı)
+  runs/demo_secim/ ← demo aday listeleri ve temas sayfaları (git dışı)
   data/yolo/       ← YOLO formatlı veri + data.yaml (prepare_yolo.py çıktısı, git dışı)
   src/kaggle/      ← Kaggle'a yüklenecek zip'i hazırlayan script (pack_dataset.py)
   data/kaggle_upload/ ← Kaggle'a yüklenecek zip (pack_dataset.py çıktısı, git dışı)

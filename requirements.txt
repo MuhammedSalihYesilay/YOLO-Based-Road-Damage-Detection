@@ -11,4 +11,6 @@ opencv-python==5.0.0.93
 pandas==3.0.6
 matplotlib==3.11.2
 
-# Arayüz adımında eklenecek: streamlit, streamlit-webrtc
+# Arayüz (Adım 7a, 2026-11-14): Streamlit web arayüzü
+streamlit==1.67.0
+# Kamera adımında (Adım 8) eklenecek: streamlit-webrtc

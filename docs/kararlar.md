@@ -354,3 +354,35 @@ Her kayıt: tarih — karar — gerekçe.
 - **Gerekçe:** Bağlantıyı abartmamak ve Health/Environment'ı tekrar etmemek. BM metinleri kendi cümlelerimizle
   anlatıldı; birebir metinler yalnız Kaynak Kontrol Tablosu'nda.
 - Ayrıntı: [rapor/sdg.md](rapor/sdg.md) (Kaynak Kontrol Tablosu; git dışı kopyası ve Türkçe açıklaması `rapor/ozel/` altında)
+
+## 2026-11-14 — Adım 7a: Streamlit görüntü prototipi (arayüz kararları)
+- **Karar:** Görüntü sayfası tamamlandı: fotoğraf yükleme (çoklu) veya örnek seçme → e5 (YOLO26s, imgsz 1024) →
+  kutu + sınıf + güven skoru, eşik kaydırıcısı ve sınıf filtresi. Çok sayfalı yapı (`st.navigation`); 7b'de Video,
+  Adım 8'de Kamera aynı `src/app/core/` modüllerini kullanacak. `streamlit==1.67.0` `requirements.txt`'e eklendi.
+- **Model ve tahmin:** FP32 `quantize=32` ile (Ultralytics 8.4.182'de `half` kullanımdan kalkıyor; kaynak kod ve
+  ağırlık tipiyle float32 olduğu doğrulandı). Model bir kez yüklenir + ısınma tahmini; her görüntüde bir kez eşik
+  0,05 ile çalışır, arayüz eşiği yalnızca süzer; sonuçlar dosya baytlarına göre önbellekte. Varsayılan eşik **0,25**
+  (e5 val F1 tepesi 0,276).
+- **Görüntü:** EXIF yön düzeltmesi; uzun kenar 1280'e küçültme (Norveç eğitim ön işlemesiyle aynı); kendi çizimimiz
+  (Okabe–Ito renkleri, kısa "D40 0,82" etiketi, Türkçe karakter ve internet bağımlılığı yok).
+- **Arayüz:** iki dil (TR/EN, varsayılan TR; tüm metinler `core/texts.py`), başlık ve açıklama metni kullanıcının.
+  Tema yalnız `.streamlit/config.toml` (vurgu `#1F4E5F`, sistem yazı tipi), özel CSS yok. Örnek görüntüler sekmesi
+  (kare küçük resim, seçili düğme vurgulu), seçili görüntü satırı, sonuç tablosu `st.table`. Seçim değişince sonuç
+  bölümüne otomatik kaydırma: Streamlit 1.67'de resmî yol olmadığı için `st.html(unsafe_allow_javascript=True)` ile
+  sabit bir script; hata olursa yalnız kaydırma olmaz. Alt not: "son karar insandadır" + RDD2022 atfı.
+- **Demo seti:** RDD2022 etiketsiz resmî test klasöründen 10 görüntü (`src/app/assets/demo/`, git'e girer,
+  CC BY-SA 4.0, `KAYNAK.md`); `src/data/select_demo_images.py` ile temas sayfasından seçildi; ABD yok (aşağıdaki kayıt).
+- **Gerekçe:** Vizede önerideki arayüzün çalıştığını göstermek; sunumda internet gerekmeden çalışması (yerel yazı
+  tipi, yerel örnekler); 7b ve Adım 8'e kolay genişleme. Ayrıntı ve elle test gözlemleri:
+  [adimlar/adim-7-arayuz.md](adimlar/adim-7-arayuz.md).
+
+## 2026-11-14 — Risk: ABD görüntülerinde Google filigranı; demo setine ABD görüntüsü konmadı
+- **Gözlem:** Demo adaylarının temas sayfasında (`src/data/select_demo_images.py`, `runs/demo_secim/`) RDD2022'nin ABD
+  görüntülerinin alt köşelerinde "Google" filigranı görüldü. Görüntüler Google Street View kaynaklı olabilir; bunların
+  kullanım koşulları **doğrulanmadı** (veri setinin CC BY 4.0 / CC BY-SA 4.0 lisansının bu görüntüleri kapsayıp
+  kapsamadığı bilinmiyor).
+- **Karar:** Herkese açık repodaki arayüz demo setine (`src/app/assets/demo/`) **ABD görüntüsü konmaz**. Eğitim ve
+  değerlendirmede ABD görüntüleri kullanılmaya devam ediyor (karar değişmedi); bu not yalnız görüntülerin repoda
+  yeniden dağıtılmasıyla ilgili.
+- **Gerekçe:** Kullanım koşulları belirsiz görüntüyü public repoda paylaşmamak en düşük riskli seçenek; demo için
+  diğer beş alt kümeden yeterli aday var. Raporun Legal / Risk Management bölümünde sınırlama olarak anılabilir.

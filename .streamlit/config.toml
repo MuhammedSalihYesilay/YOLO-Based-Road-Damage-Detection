@@ -1,0 +1,24 @@
+# Streamlit ayarları (Adım 7a). Bu dosya repo kökünde; uygulama kökten çalıştırılınca okunur:
+#   venv\Scripts\python.exe -m streamlit run src/app/app.py
+# Görünüm yalnızca tema ayarlarıyla yapılır, özel CSS yok (CSS Streamlit sürümü değişince kırılabiliyor).
+
+[theme]
+base = "light"
+primaryColor = "#1F4E5F"            # vurgu rengi (petrol mavisi): ilk sürüm, kesin renk ekranda görülüp seçilecek
+backgroundColor = "#FFFFFF"         # ana zemin
+secondaryBackgroundColor = "#F4F4F2" # kenar çubuğu ve giriş kutuları: hafif sıcak gri
+textColor = "#1F2328"               # tam siyah değil, koyu gri: göz yormaz
+font = "sans-serif"                 # sistem yazı tipi: internet gerekmez (sunumda çevrimdışı çalışır)
+baseRadius = "small"                # köşeler hafif yuvarlak (varsayılandan daha az "yumuşak")
+showWidgetBorder = true             # giriş alanlarının kenarlığı görünür: daha net, form gibi
+paddingTop = "2rem"                 # başlığın üstündeki boşluk (varsayılan fazla geniş)
+
+[client]
+toolbarMode = "viewer"              # sağ üstteki geliştirici menüsü ve "Deploy" düğmesi gizli
+
+[browser]
+gatherUsageStats = false            # Streamlit'e kullanım istatistiği gönderme
+
+[server]
+maxUploadSize = 20                  # MB; telefon fotoğrafına yeter, yanlışlıkla dev dosya yüklenmesini engeller
+fileWatcherType = "none"            # izleyici torch modüllerini tararken hata basabiliyor; kod değişince sayfayı elle yenile
